@@ -1,0 +1,17 @@
+{
+    "manifest_version": 3,
+
+    "name": "Page Theme Changer",
+    "version": "1.0.0",
+
+    "description": "Change the theme of the current webpage",
+
+    "permissions": [
+        "activeTab",
+        "scripting"
+    ],
+
+    "action": {
+        "default_popup": "popup.html"
+    }
+}

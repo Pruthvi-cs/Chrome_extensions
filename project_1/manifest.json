@@ -1,0 +1,10 @@
+{
+    "manifest_version":3,
+    "name": "My crazy extension",
+    "version":"1.0",
+    "description":"lets have fun with chrome extensions",
+    
+    "action":{
+        "default_popup":"popup.html"
+    }
+}
