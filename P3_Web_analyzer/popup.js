@@ -104,31 +104,7 @@ analyzeButton.addEventListener("click", async () => {
 
 
             links.forEach(link => {
-links.forEach(link => {
 
-    const href = link.getAttribute("href");
-
-    if (href) {
-
-        const fullUrl =
-            new URL(href, location.href).href;
-
-        const linkHostname =
-            new URL(fullUrl).hostname;
-
-        if (linkHostname === location.hostname) {
-
-            internalLinks++;
-
-        } else {
-
-            externalLinks++;
-
-        }
-
-    }
-
-});
                 // Get visible link text
                 const text =
                     link.textContent.trim();
