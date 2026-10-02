@@ -383,20 +383,134 @@ downloadCSVButton.addEventListener("click", () => {
     }
 
 
-    let csv = "Text,URL\n";
+    let csv = "";
 
 
-    analysisData.linkData.forEach(link => {
+    // ========================================
+    // PAGE INFORMATION
+    // ========================================
 
-        csv += `"${link.text}","${link.url}"\n`;
+    csv += "WEBSITE ANALYSIS REPORT\n\n";
+
+    csv += "Page Information\n";
+
+    csv += `Title,"${analysisData.title}"\n`;
+
+    csv += `URL,"${analysisData.url}"\n\n`;
+
+
+    // ========================================
+    // STATISTICS
+    // ========================================
+
+    csv += "Statistics\n";
+
+    csv += `H1,${analysisData.h1}\n`;
+
+    csv += `H2,${analysisData.h2}\n`;
+
+    csv += `Paragraphs,${analysisData.paragraphs}\n`;
+
+    csv += `Images,${analysisData.images}\n`;
+
+    csv += `Links,${analysisData.links}\n`;
+
+    csv += `Internal Links,${analysisData.internalLinks}\n`;
+
+    csv += `External Links,${analysisData.externalLinks}\n`;
+
+    csv += `Buttons,${analysisData.buttons}\n\n`;
+
+
+    // ========================================
+    // HEADINGS
+    // ========================================
+
+    csv += "Headings\n";
+
+    csv += "Type,Text\n";
+
+
+    analysisData.headings.forEach(heading => {
+
+        const text =
+            heading.text
+                .replace(/\s+/g, " ")
+                .trim()
+                .replace(/"/g, '""');
+
+
+        csv += `"${heading.type}","${text}"\n`;
 
     });
 
 
+    csv += "\n";
+
+
+    // ========================================
+    // LINKS
+    // ========================================
+
+    csv += "Links\n";
+
+    csv += "Text,URL,Type\n";
+
+
+    analysisData.linkData.forEach(link => {
+
+        const text =
+            link.text
+                .replace(/\s+/g, " ")
+                .trim()
+                .replace(/"/g, '""');
+
+
+        const url =
+            link.url
+                .replace(/"/g, '""');
+
+
+        let type = "External";
+
+
+        try {
+
+            const linkHostname =
+                new URL(link.url).hostname;
+
+
+            const pageHostname =
+                new URL(analysisData.url).hostname;
+
+
+            if (linkHostname === pageHostname) {
+
+                type = "Internal";
+
+            }
+
+        } catch (error) {
+
+            type = "Other";
+
+        }
+
+
+        csv +=
+            `"${text}","${url}","${type}"\n`;
+
+    });
+
+
+    // ========================================
+    // CREATE FILE
+    // ========================================
+
     const blob = new Blob(
         [csv],
         {
-            type: "text/csv"
+            type: "text/csv;charset=utf-8;"
         }
     );
 
@@ -412,7 +526,7 @@ downloadCSVButton.addEventListener("click", () => {
     a.href = url;
 
     a.download =
-        "website-links.csv";
+        "website-analysis.csv";
 
 
     a.click();
