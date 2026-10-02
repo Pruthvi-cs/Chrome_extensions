@@ -93,8 +93,8 @@ analyzeButton.addEventListener("click", async () => {
 
             });
 
-let internalLinks = 0;
-let externalLinks = 0;
+            let internalLinks = 0;
+            let externalLinks = 0;
             // -----------------------------
             // EXTRACT LINKS
             // -----------------------------
