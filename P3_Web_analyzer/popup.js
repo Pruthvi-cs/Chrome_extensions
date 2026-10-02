@@ -298,7 +298,16 @@ let externalLinks = 0;
         ${data.links}
 
         <br>
+        <strong>Internal Links:</strong>
+        ${data.internalLinks}
 
+        <br>
+
+        <strong>External Links:</strong>
+        ${data.externalLinks}
+
+        <br>
+        
         <strong>Buttons:</strong>
         ${data.buttons}
 
