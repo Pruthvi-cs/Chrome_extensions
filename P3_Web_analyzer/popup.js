@@ -2,6 +2,7 @@
 const analyzeButton = document.getElementById("analyzeButton");
 const results = document.getElementById("results");
 const downloadButton = document.getElementById("downloadButton");
+let analysisData = null;
 
 // When the Analyze button is clicked
 analyzeButton.addEventListener("click", async () => {
