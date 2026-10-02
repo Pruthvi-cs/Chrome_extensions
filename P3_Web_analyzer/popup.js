@@ -195,6 +195,8 @@ analyzeButton.addEventListener("click", async () => {
     const headingHTML =
     createHeadingHTML(data.headings);
     analysisData = data;
+    const linkHTML =
+    createLinkHTML(data.linkData);
     function createHeadingHTML(headings) {
 
         let html = "";
@@ -221,37 +223,38 @@ analyzeButton.addEventListener("click", async () => {
     // CREATE LINK HTML 
     // -----------------------------
 
-    let linkHTML = "";
+    function createLinkHTML(links) {
 
+        let html = "";
 
-    data.linkData.forEach(link => {
+        links.forEach(link => {
 
-        linkHTML += `
-            <div style="margin-bottom: 10px;">
+            html += `
+                <div style="margin-bottom: 10px;">
 
-                <strong>
-                    ${link.text || "Unnamed link"}
-                </strong>
+                    <strong>
+                        ${link.text || "Unnamed link"}
+                    </strong>
 
-                <br>
+                    <br>
 
-                <small>
-                    ${link.url}
-                </small>
+                    <small>
+                        ${link.url}
+                    </small>
 
-            </div>
-        `;
+                </div>
+            `;
 
-    });
+        });
 
+        if (html === "") {
 
-    // If there are no links
-    if (linkHTML === "") {
+            html = "<em>No links found.</em>";
 
-        linkHTML =
-            "<em>No links found.</em>";
+        }
 
-    }
+        return html;
+    }}
 
 
     // -----------------------------
