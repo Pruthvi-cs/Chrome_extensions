@@ -190,7 +190,8 @@ analyzeButton.addEventListener("click", async () => {
 
     // Get the actual result returned
     // from the webpage here 
-    analysisData = pageData[0].result;  
+    const data = pageData[0].result;
+    analysisData = data;
 
 
     let headingHTML = "";
