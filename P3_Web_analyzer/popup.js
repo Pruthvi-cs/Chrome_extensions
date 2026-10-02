@@ -141,7 +141,7 @@ analyzeButton.addEventListener("click", async () => {
 
 
             // -----------------------------
-            // RETURN DATA TO POPUP data 
+            // RETURN DATA TO POPUP data  gg
             // -----------------------------
 
             return {
