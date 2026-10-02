@@ -1,7 +1,7 @@
 
 const analyzeButton = document.getElementById("analyzeButton");
 const results = document.getElementById("results");
-
+const downloadButton = document.getElementById("downloadButton");
 
 // When the Analyze button is clicked
 analyzeButton.addEventListener("click", async () => {
@@ -307,7 +307,7 @@ let externalLinks = 0;
         ${data.externalLinks}
 
         <br>
-        
+
         <strong>Buttons:</strong>
         ${data.buttons}
 
