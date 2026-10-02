@@ -326,10 +326,48 @@ analyzeButton.addEventListener("click", async () => {
 
 });
 downloadButton.addEventListener("click", () => {
+
     if (!analysisData) {
 
-    alert("Please analyze a page first.");
+        alert("Please analyze a page first.");
 
-    return;
-}
+        return;
+    }
+
+
+    const jsonData =
+        JSON.stringify(
+            analysisData,
+            null,
+            2
+        );
+
+
+    const blob = new Blob(
+        [jsonData],
+        {
+            type: "application/json"
+        }
+    );
+
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const a =
+        document.createElement("a");
+
+
+    a.href = url;
+
+    a.download =
+        "website-analysis.json";
+
+
+    a.click();
+
+
+    URL.revokeObjectURL(url);
+
 });
