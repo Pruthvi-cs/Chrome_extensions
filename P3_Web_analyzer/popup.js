@@ -178,7 +178,7 @@ let externalLinks = 0;
 
                 linkData: linkData,
                 internalLinks: internalLinks,
-    externalLinks: externalLinks
+                externalLinks: externalLinks
 
             };
 
