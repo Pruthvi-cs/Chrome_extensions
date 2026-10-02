@@ -373,3 +373,51 @@ downloadButton.addEventListener("click", () => {
     URL.revokeObjectURL(url);
 
 });
+downloadCSVButton.addEventListener("click", () => {
+
+    if (!analysisData) {
+
+        alert("Please analyze a page first.");
+
+        return;
+    }
+
+
+    let csv = "Text,URL\n";
+
+
+    analysisData.linkData.forEach(link => {
+
+        csv += `"${link.text}","${link.url}"\n`;
+
+    });
+
+
+    const blob = new Blob(
+        [csv],
+        {
+            type: "text/csv"
+        }
+    );
+
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const a =
+        document.createElement("a");
+
+
+    a.href = url;
+
+    a.download =
+        "website-links.csv";
+
+
+    a.click();
+
+
+    URL.revokeObjectURL(url);
+
+});
