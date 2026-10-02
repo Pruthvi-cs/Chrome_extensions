@@ -2,6 +2,7 @@
 const analyzeButton = document.getElementById("analyzeButton");
 const results = document.getElementById("results");
 const downloadButton = document.getElementById("downloadButton");
+const downloadCSVButton =  document.getElementById("downloadCSVButton");
 let analysisData = null;
 
 // When the Analyze button is clicked
