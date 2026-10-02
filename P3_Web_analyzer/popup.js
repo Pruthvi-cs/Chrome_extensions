@@ -190,7 +190,7 @@ analyzeButton.addEventListener("click", async () => {
 
     // Get the actual result returned
     // from the webpage here 
-    const data = pageData[0].result;
+    analysisData = pageData[0].result;  
 
 
     let headingHTML = "";
@@ -324,4 +324,12 @@ analyzeButton.addEventListener("click", async () => {
 
     `;
 
+});
+downloadButton.addEventListener("click", () => {
+    if (!analysisData) {
+
+    alert("Please analyze a page first.");
+
+    return;
+}
 });
