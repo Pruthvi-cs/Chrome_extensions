@@ -192,35 +192,33 @@ analyzeButton.addEventListener("click", async () => {
     // Get the actual result returned
     // from the webpage here 
     const data = pageData[0].result;
+    const headingHTML =
+    createHeadingHTML(data.headings);
     analysisData = data;
+    function createHeadingHTML(headings) {
 
+        let html = "";
 
-    let headingHTML = "";
+        headings.forEach(heading => {
 
+            html += `
+                <div>
+                    <strong>${heading.type}</strong>
+                    ${heading.text}
+                </div>
+            `;
 
-    data.headings.forEach(heading => {
+        });
 
-        headingHTML += `
-            <div>
-                <strong>${heading.type}</strong>
-                ${heading.text}
-            </div>
-        `;
+        if (html === "") {
 
-    });
+            html = "<em>No headings found.</em>";
+        }
 
-
-    // If there are no headings
-    if (headingHTML === "") {
-
-        headingHTML =
-            "<em>No headings found.</em>";
-
+        return html;
     }
-
-
     // -----------------------------
-    // CREATE LINK HTML
+    // CREATE LINK HTML 
     // -----------------------------
 
     let linkHTML = "";
