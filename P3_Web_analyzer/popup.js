@@ -254,7 +254,7 @@ analyzeButton.addEventListener("click", async () => {
         }
 
         return html;
-    }};
+    }
 
 
     // -----------------------------
