@@ -176,7 +176,9 @@ let externalLinks = 0;
 
                 headings: headingData,
 
-                linkData: linkData
+                linkData: linkData,
+                internalLinks: internalLinks,
+    externalLinks: externalLinks
 
             };
 
