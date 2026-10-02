@@ -127,7 +127,18 @@ let externalLinks = 0;
                             location.href
                         ).href;
 
+                    const linkHostname =
+                                new URL(fullUrl).hostname;
 
+                            if (linkHostname === location.hostname) {
+
+                                internalLinks++;
+
+                            } else {
+
+                                externalLinks++;
+
+                            }
                     linkData.push({
 
                         text: text,
