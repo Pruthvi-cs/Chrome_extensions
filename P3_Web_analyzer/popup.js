@@ -164,6 +164,13 @@ function renderResults(
             ${data.hasTitle ? " Present" : " Missing"}
 
         <br>
+        <strong>
+            Meta Description:
+        </strong>
+
+        ${data.hasDescription ? " Present" : " Missing"}
+
+        <br>
 
 
         <strong>
