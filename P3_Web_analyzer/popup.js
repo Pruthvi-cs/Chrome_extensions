@@ -157,6 +157,14 @@ function renderResults(
             📊 Statistics
         </h3>
 
+        <strong>
+            Title:
+        </strong>
+
+            ${data.hasTitle ? "✅ Present" : "❌ Missing"}
+
+        <br>
+
 
         <strong>
             H1:
