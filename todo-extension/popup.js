@@ -1,16 +1,11 @@
-const todoInput =
-    document.getElementById("todoInput");
-
-const addButton =
-    document.getElementById("addButton");
-
-const todoList =
-    document.getElementById("todoList");
-
+const todoInput = document.getElementById("todoInput");
+const addButton = document.getElementById("addButton");
+const todoList = document.getElementById("todoList");
+let todos = [];
 
 addButton.addEventListener(
     "click",
-    () => {
+    async () => {
 
         const task =
             todoInput.value.trim();
@@ -21,6 +16,14 @@ addButton.addEventListener(
             return;
 
         }
+
+
+        todos.push(task);
+
+
+        await chrome.storage.local.set({
+            todos: todos
+        });
 
 
         const li =
