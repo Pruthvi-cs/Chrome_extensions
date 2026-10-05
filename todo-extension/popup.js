@@ -19,13 +19,18 @@ addButton.addEventListener(
 
 
         todos.push({
+
             text: task,
+
             completed: false
+
         });
 
 
         await chrome.storage.local.set({
+
             todos: todos
+
         });
 
 
