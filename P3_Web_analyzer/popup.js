@@ -323,8 +323,17 @@ analyzeButton.addEventListener(
                         const currentUrl =
                             location.href;
                         
-                            const hasTitle =
+                        const hasTitle =
                             title.trim().length > 0;
+
+                        const metaDescription =
+                            document.querySelector(
+                                'meta[name="description"]'
+                            );
+                        const description =
+                            metaDescription
+                                ? metaDescription.getAttribute("content")
+                                : "";
 
 
                         // =================================================
