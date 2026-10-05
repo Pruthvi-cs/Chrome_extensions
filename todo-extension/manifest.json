@@ -1,0 +1,17 @@
+{
+    "manifest_version": 3,
+
+    "name": "My Todo",
+
+    "version": "1.0",
+
+    "description": "A simple Todo Chrome Extension",
+
+    "permissions": [
+        "storage"
+    ],
+
+    "action": {
+        "default_popup": "popup.html"
+    }
+}
