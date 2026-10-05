@@ -52,30 +52,70 @@ async function loadTodos() {
 
 }
 loadTodos();
+
+
 function renderTodos() {
 
     todoList.innerHTML = "";
 
-
-    todos.forEach((task, index) => {
+    todos.forEach((todo, index) => {
 
         const li =
             document.createElement("li");
 
 
+        // Checkbox
+
+        const checkbox =
+            document.createElement("input");
+
+        checkbox.type =
+            "checkbox";
+
+        checkbox.checked =
+            todo.completed;
+
+
+        // Task text
+
         const text =
             document.createElement("span");
 
         text.textContent =
-            task;
+            todo.text;
 
+
+        // Delete button
 
         const deleteButton =
             document.createElement("button");
 
         deleteButton.textContent =
-            "Del";
+            "🗑️";
 
+
+        // Complete / Uncomplete
+
+        checkbox.addEventListener(
+            "change",
+            async () => {
+
+                todo.completed =
+                    checkbox.checked;
+
+
+                await chrome.storage.local.set({
+                    todos: todos
+                });
+
+
+                renderTodos();
+
+            }
+        );
+
+
+        // Delete
 
         deleteButton.addEventListener(
             "click",
@@ -95,9 +135,22 @@ function renderTodos() {
         );
 
 
+        // Strike completed task
+
+        if (todo.completed) {
+
+            text.style.textDecoration =
+                "line-through";
+
+        }
+
+
+        li.appendChild(checkbox);
+
         li.appendChild(text);
 
         li.appendChild(deleteButton);
+
 
         todoList.appendChild(li);
 
