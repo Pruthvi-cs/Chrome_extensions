@@ -45,19 +45,7 @@ async function loadTodos() {
         result.todos || [];
 
 
-    todos.forEach(task => {
-
-        const li =
-            document.createElement("li");
-
-
-        li.textContent =
-            task;
-
-
-        todoList.appendChild(li);
-
-    });
+    renderTodos();
 
 }
 loadTodos();
@@ -83,7 +71,7 @@ function renderTodos() {
             document.createElement("button");
 
         deleteButton.textContent =
-            "🗑️";
+            "Del";
 
 
         deleteButton.addEventListener(
