@@ -237,7 +237,7 @@ function renderResults(
 
 
         <h3>
-            📑 Headings
+             Headings
         </h3>
 
         ${headingHTML}
