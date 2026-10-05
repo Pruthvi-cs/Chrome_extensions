@@ -43,3 +43,31 @@ h1 {
     margin-top: 8px;
     background: #f1f1f1;
 }
+#todoList li {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    padding: 10px;
+
+    margin-top: 8px;
+
+    background: #f1f1f1;
+
+}
+
+
+#todoList li button {
+
+    border: none;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    font-size: 16px;
+
+}
