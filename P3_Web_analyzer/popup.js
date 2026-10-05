@@ -335,6 +335,9 @@ analyzeButton.addEventListener(
                                 ? metaDescription.getAttribute("content")
                                 : "";
 
+                        const hasDescription =
+                            description.trim().length > 0;
+
 
                         // =================================================
                         // COUNT PAGE ELEMENTS
