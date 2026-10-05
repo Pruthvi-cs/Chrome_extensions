@@ -3,7 +3,9 @@ const addButton = document.getElementById("addButton");
 const todoList = document.getElementById("todoList");
 let todos = [];
 
-addButton.addEventListener("click",async () => {
+addButton.addEventListener(
+    "click",
+    async () => {
 
         const task =
             todoInput.value.trim();
@@ -15,16 +17,19 @@ addButton.addEventListener("click",async () => {
 
         }
 
+
         todos.push(task);
+
 
         await chrome.storage.local.set({
             todos: todos
         });
 
-        const li = document.createElement("li");
-        li.textContent =task;
-        todoList.appendChild(li);
+
         todoInput.value = "";
+
+
+        renderTodos();
 
     }
 );
