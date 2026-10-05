@@ -314,6 +314,9 @@ analyzeButton.addEventListener(
 
                         const currentUrl =
                             location.href;
+                        
+                            const hasTitle =
+                            title.trim().length > 0;
 
 
                         // =================================================
