@@ -1,6 +1,7 @@
 const todoInput = document.getElementById("todoInput");
 const addButton = document.getElementById("addButton");
 const todoList = document.getElementById("todoList");
+const deleteButton =document.createElement("button");
 let todos = [];
 
 addButton.addEventListener(
@@ -95,8 +96,7 @@ function renderTodos() {
         const deleteButton =
             document.createElement("button");
 
-        deleteButton.textContent =
-            "🗑️";
+            deleteButton.innerHTML = "&#128465;";
 
 
         // Complete / Uncomplete

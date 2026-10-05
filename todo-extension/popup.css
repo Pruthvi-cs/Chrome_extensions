@@ -71,3 +71,14 @@ h1 {
     font-size: 16px;
 
 }
+#todoList li button {
+
+    border: none;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    font-size: 16px;
+
+}
