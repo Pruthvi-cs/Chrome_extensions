@@ -547,6 +547,11 @@ analyzeButton.addEventListener(
                             
                             hasTitle:
                                 hasTitle,
+                            description:
+                                description,
+
+                            hasDescription:
+                                hasDescription,
 
                             h1:
                                 h1Count,
