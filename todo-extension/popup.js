@@ -162,3 +162,15 @@ function renderTodos() {
     });
 
 }
+todoInput.addEventListener(
+    "keydown",
+    (event) => {
+
+        if (event.key === "Enter") {
+
+            addButton.click();
+
+        }
+
+    }
+);
