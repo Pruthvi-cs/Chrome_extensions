@@ -129,7 +129,7 @@ function renderResults(
         <hr>
 
         <h3>
-            📄 Page Information
+             Page Information
         </h3>
 
 
@@ -154,14 +154,14 @@ function renderResults(
 
 
         <h3>
-            📊 Statistics
+             Statistics
         </h3>
 
         <strong>
             Title:
         </strong>
 
-            ${data.hasTitle ? "✅ Present" : "❌ Missing"}
+            ${data.hasTitle ? " Present" : " Missing"}
 
         <br>
 
@@ -244,7 +244,7 @@ function renderResults(
 
 
         <h3>
-            🔗 Links
+             Links
         </h3>
 
         ${linkHTML}
@@ -627,7 +627,7 @@ analyzeButton.addEventListener(
             results.innerHTML = `
                 
                 <p>
-                    ❌ Error analyzing this page.
+                     Error analyzing this page.
                 </p>
 
                 <small>
