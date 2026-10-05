@@ -524,6 +524,9 @@ analyzeButton.addEventListener(
 
                             url:
                                 currentUrl,
+                            
+                            hasTitle:
+                                hasTitle,
 
                             h1:
                                 h1Count,
