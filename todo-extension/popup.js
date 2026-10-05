@@ -56,3 +56,55 @@ async function loadTodos() {
 
 }
 loadTodos();
+function renderTodos() {
+
+    todoList.innerHTML = "";
+
+
+    todos.forEach((task, index) => {
+
+        const li =
+            document.createElement("li");
+
+
+        const text =
+            document.createElement("span");
+
+        text.textContent =
+            task;
+
+
+        const deleteButton =
+            document.createElement("button");
+
+        deleteButton.textContent =
+            "🗑️";
+
+
+        deleteButton.addEventListener(
+            "click",
+            async () => {
+
+                todos.splice(index, 1);
+
+
+                await chrome.storage.local.set({
+                    todos: todos
+                });
+
+
+                renderTodos();
+
+            }
+        );
+
+
+        li.appendChild(text);
+
+        li.appendChild(deleteButton);
+
+        todoList.appendChild(li);
+
+    });
+
+}
