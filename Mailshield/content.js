@@ -167,14 +167,12 @@
 
     for (const test of urlTestCases) {
         const result = checkUrlRisk(test.url);
-
-        console.log("[Mailshield Test]", {
-            name: test.name,
-            actual: result.level,
-            expected: test.expected,
-            passed: result.level === test.expected,
-            findings: result.findings
-        });
+        console.log(
+            `[Mailshield Test] ${test.name}: ${
+                result.level === test.expected ? "PASS" : "FAIL"
+            }`,
+            result
+        );
     }
 
     // Display a report without inserting email content as HTML.
