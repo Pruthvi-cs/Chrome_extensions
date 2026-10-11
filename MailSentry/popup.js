@@ -68,37 +68,57 @@ function renderParsedInformation(parsed) {
 }
 
 // Display security findings from the analyzer.
+
 function renderSecurityFindings(analysis) {
+    results.appendChild(
+        createHeading("Security Assessment")
+    );
+
+    const assessmentCard = document.createElement("section");
+    assessmentCard.className = "assessment-card";
+    assessmentCard.dataset.severity = analysis.assessmentLevel;
+
+    const assessmentTitle = document.createElement("h3");
+    assessmentTitle.textContent = analysis.assessment;
+
+    const assessmentSummary = document.createElement("p");
+    assessmentSummary.textContent = analysis.summary;
+
+    assessmentCard.append(
+        assessmentTitle,
+        assessmentSummary
+    );
+
+    results.appendChild(assessmentCard);
+
     results.appendChild(
         createHeading("Security Findings")
     );
 
-    const summary = document.createElement("p");
-    summary.textContent = analysis.summary;
-    results.appendChild(summary);
-
-    if (!analysis.findings.length) {
-        const empty = document.createElement("p");
-        empty.textContent = "No findings were generated.";
-        results.appendChild(empty);
-        return;
-    }
-
     for (const finding of analysis.findings) {
         const card = document.createElement("section");
-        const title = document.createElement("h4");
-        const detail = document.createElement("p");
-
         card.className = "finding-card";
         card.dataset.severity = finding.severity;
 
+        const title = document.createElement("h4");
         title.textContent = finding.title;
+
+        const detail = document.createElement("p");
         detail.textContent = finding.detail;
 
         card.append(title, detail);
         results.appendChild(card);
     }
+
+    const disclaimer = document.createElement("p");
+    disclaimer.className = "security-disclaimer";
+    disclaimer.textContent =
+        "Results are based on supplied headers and are not independently verified. " +
+        "Authentication passes do not guarantee that an email is safe.";
+
+    results.appendChild(disclaimer);
 }
+
 
 // Analyze the supplied email headers.
 analyzeBtn.addEventListener("click", () => {

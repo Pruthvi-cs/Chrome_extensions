@@ -115,3 +115,68 @@ button:hover {
     margin-top: 14px;
     overflow-wrap: anywhere;
 }
+
+/* Overall security assessment */
+
+.assessment-card,
+.finding-card {
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px solid #344258;
+    border-radius: 10px;
+    background: #171f2e;
+    overflow-wrap: anywhere;
+}
+
+.assessment-card h3,
+.finding-card h4 {
+    margin: 0 0 7px;
+    font-size: 13px;
+}
+
+.assessment-card p,
+.finding-card p {
+    margin: 0;
+    color: #b7c3d4;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+/* Warning assessment and findings */
+
+[data-severity="warning"] {
+    border-left: 3px solid #fbbf24;
+}
+
+[data-severity="warning"] h3,
+[data-severity="warning"] h4 {
+    color: #fbbf24;
+}
+
+/* Positive authentication signals */
+
+[data-severity="success"] {
+    border-left: 3px solid #4ade80;
+}
+
+[data-severity="success"] h4 {
+    color: #4ade80;
+}
+
+/* Informational findings */
+
+[data-severity="info"] {
+    border-left: 3px solid #60a5fa;
+}
+
+[data-severity="info"] h3,
+[data-severity="info"] h4 {
+    color: #60a5fa;
+}
+
+.security-disclaimer {
+    margin-top: 14px;
+    color: #8f9db1;
+    font-size: 10px;
+    line-height: 1.6;
+}
