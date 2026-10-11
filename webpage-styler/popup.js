@@ -1,6 +1,12 @@
 
 const darkModeBtn = document.getElementById("darkModeBtn");
+console.log("Popup JavaScript loaded");
 
+console.log("Dark button:", document.getElementById("darkModeBtn"));
+console.log(
+    "Highlight button:",
+    document.getElementById("highlightHeadingsBtn")
+);
 darkModeBtn.addEventListener("click", async () => {
     const [tab] = await chrome.tabs.query({
         active: true,
