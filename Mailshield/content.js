@@ -1,12 +1,8 @@
-console.log("Mailshield: Gmail integration loaded.");
 (() => {
     "use strict";
 
     const BUTTON_ID = "mailshield-analyze-button";
-    const TOOLBAR_SELECTOR = [
-        "div[role='main']",
-        "div[role='main'] .aeH"
-    ].join(" ");
+    const MESSAGE_BODY_SELECTOR = ".a3s";
 
     function createAnalyzeButton() {
         const button = document.createElement("button");
@@ -20,9 +16,10 @@ console.log("Mailshield: Gmail integration loaded.");
         );
 
         Object.assign(button.style, {
-            padding: "9px 14px",
-            margin: "10px 8px",
-            border: "1px solid #334155",
+            display: "inline-block",
+            padding: "10px 16px",
+            margin: "12px 0",
+            border: "1px solid #475569",
             borderRadius: "8px",
             background: "#172554",
             color: "#ffffff",
@@ -33,9 +30,7 @@ console.log("Mailshield: Gmail integration loaded.");
         });
 
         button.addEventListener("click", () => {
-            console.log(
-                "Mailshield: Analyze button clicked."
-            );
+            console.log("Mailshield: Analyze button clicked.");
 
             button.textContent = "✓ Button working!";
         });
@@ -44,53 +39,40 @@ console.log("Mailshield: Gmail integration loaded.");
     }
 
     function addButtonToOpenEmail() {
-        const existingButton = document.getElementById(BUTTON_ID);
-
-        if (existingButton) {
-            return;
-        }
-
-        // Gmail's message toolbar is normally inside a
-        // container with role="main". Find an active toolbar.
-        const toolbars = document.querySelectorAll(
-            'div[role="main"] [role="toolbar"]'
+        const messageBodies = document.querySelectorAll(
+            MESSAGE_BODY_SELECTOR
         );
 
-        for (const toolbar of toolbars) {
-            if (!toolbar.isConnected) {
+        for (const body of messageBodies) {
+            const rect = body.getBoundingClientRect();
+
+            // Ignore hidden or collapsed message bodies.
+            if (rect.width === 0 || rect.height === 0) {
                 continue;
             }
 
-            const messageArea = toolbar.closest(
-                '[role="main"]'
-            );
+            const messageContainer = body.closest(".gs");
 
-            if (!messageArea) {
+            if (!messageContainer) {
                 continue;
             }
 
-            // Only add the button when a message is open.
-            const messageBody = messageArea.querySelector(
-                '[role="list"] [data-message-id], ' +
-                '[data-message-id] .a3s'
-            );
-
-            if (!messageBody) {
+            // Prevent duplicate buttons.
+            if (messageContainer.querySelector(`#${BUTTON_ID}`)) {
                 continue;
             }
 
-            toolbar.appendChild(createAnalyzeButton());
+            const button = createAnalyzeButton();
+
+            // Insert before the email body so it is easy to find.
+            messageContainer.insertBefore(button, body);
 
             console.log(
-                "Mailshield: Analyze button added."
+                "Mailshield: Analyze button added to an open email."
             );
-
-            return;
         }
     }
 
-    // Gmail changes its interface dynamically, so watch for
-    // newly opened messages and rebuilt toolbars.
     const observer = new MutationObserver(() => {
         addButtonToOpenEmail();
     });
@@ -102,7 +84,5 @@ console.log("Mailshield: Gmail integration loaded.");
 
     addButtonToOpenEmail();
 
-    console.log(
-        "Mailshield: Gmail button integration initialized."
-    );
+    console.log("Mailshield: Gmail integration initialized.");
 })();
