@@ -140,6 +140,43 @@
 
         return { level, findings };
     }
+    
+    // TEMPORARY STEP 7 TESTS — remove after validation.
+    const urlTestCases = [
+        {
+            name: "Normal HTTPS",
+            url: "https://example.com",
+            expected: "NO OBVIOUS FLAGS"
+        },
+        {
+            name: "Unencrypted HTTP",
+            url: "http://example.com",
+            expected: "REVIEW"
+        },
+        {
+            name: "URL user information",
+            url: "https://example.com@evil.test/login",
+            expected: "REVIEW"
+        },
+        {
+            name: "Malformed URL",
+            url: "not a valid URL",
+            expected: "REVIEW"
+        }
+    ];
+
+    for (const test of urlTestCases) {
+        const result = checkUrlRisk(test.url);
+
+        console.log("[Mailshield Test]", {
+            name: test.name,
+            actual: result.level,
+            expected: test.expected,
+            passed: result.level === test.expected,
+            findings: result.findings
+        });
+    }
+
     // Display a report without inserting email content as HTML.
     function showReport(email) {
         document.getElementById(PANEL_ID)?.remove();
