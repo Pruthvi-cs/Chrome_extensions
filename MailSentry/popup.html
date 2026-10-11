@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MailSentry</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <main class="app">
+        <header class="header">
+            <div class="logo">M</div>
+            <div>
+                <h1>MailSentry</h1>
+                <p>Email Security Analyzer</p>
+            </div>
+        </header>
+
+        <div class="divider"></div>
+
+        <section class="welcome">
+            <h2>Investigate an email</h2>
+            <p>Analyze email headers to understand authentication and suspicious signals.</p>
+        </section>
+
+        <label for="emailHeaders">Raw email headers</label>
+        <textarea
+            id="emailHeaders"
+            placeholder="Paste email headers here..."
+            rows="7"
+        ></textarea>
+
+        <button id="analyzeBtn" type="button">
+            Analyze Email Headers
+        </button>
+
+        <p class="notice">
+            Analysis is performed locally in this initial version.
+        </p>
+
+        <div id="results" aria-live="polite"></div>
+    </main>
+
+    <script src="popup.js"></script>
+</body>
+</html>
