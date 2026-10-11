@@ -1,12 +1,6 @@
 
 const darkModeBtn = document.getElementById("darkModeBtn");
-console.log("Popup JavaScript loaded");
 
-console.log("Dark button:", document.getElementById("darkModeBtn"));
-console.log(
-    "Highlight button:",
-    document.getElementById("highlightHeadingsBtn")
-);
 darkModeBtn.addEventListener("click", async () => {
     const [tab] = await chrome.tabs.query({
         active: true,
@@ -18,33 +12,43 @@ darkModeBtn.addEventListener("click", async () => {
         return;
     }
 
-    await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: () => {
-            const root = document.documentElement;
+    try {
+        await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: () => {
+                const styleId = "webpage-styler-dark-mode-style";
+                const existingStyle = document.getElementById(styleId);
 
-            if (root.dataset.stylerDark === "true") {
-                root.style.filter = "";
-                document.querySelectorAll(
-                    "img, video, picture, canvas"
-                ).forEach(element => {
-                    element.style.filter = "";
-                });
+                // If our stylesheet exists, remove only our own changes.
+                if (existingStyle) {
+                    existingStyle.remove();
+                    console.log("Dark mode disabled!");
+                    return;
+                }
 
-                root.dataset.stylerDark = "false";
-            } else {
-                root.style.filter = "invert(1) hue-rotate(180deg)";
+                // Create our own stylesheet.
+                const style = document.createElement("style");
+                style.id = styleId;
 
-                document.querySelectorAll(
-                    "img, video, picture, canvas"
-                ).forEach(element => {
-                    element.style.filter = "invert(1) hue-rotate(180deg)";
-                });
+                style.textContent = `
+                    html {
+                        filter: invert(1) hue-rotate(180deg) !important;
+                    }
 
-                root.dataset.stylerDark = "true";
+                    img, video, picture, canvas, svg {
+                        filter: invert(1) hue-rotate(180deg) !important;
+                    }
+                `;
+
+                (document.head || document.documentElement)
+                    .appendChild(style);
+
+                console.log("Dark mode enabled!");
             }
-        }
-    });
+        });
+    } catch (error) {
+        console.error("Unable to toggle dark mode:", error);
+    }
 });
 
 
