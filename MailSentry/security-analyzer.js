@@ -169,10 +169,44 @@ function analyzeEmailSecurity(parsed) {
         });
     }
 
+        
+    const hasFailure = findings.some(
+        finding =>
+            finding.title.includes("reported a failure")
+    );
+
+    const hasMismatch = findings.some(
+        finding =>
+            finding.title.includes("domains differ")
+    );
+
+    const hasPass = findings.some(
+        finding =>
+            finding.title.includes("reported a pass")
+    );
+
+    let assessment;
+    let assessmentLevel;
+
+    if (hasFailure) {
+        assessment = "Authentication concerns detected";
+        assessmentLevel = "warning";
+    } else if (hasMismatch) {
+        assessment = "Review recommended";
+        assessmentLevel = "warning";
+    } else if (hasPass) {
+        assessment = "Some positive authentication signals";
+        assessmentLevel = "info";
+    } else {
+        assessment = "Insufficient evidence";
+        assessmentLevel = "info";
+    }
+
     return {
         findings,
-        summary: findings.length
-            ? `Analysis complete: ${findings.length} findings.`
-            : "No findings were generated."
+        assessment,
+        assessmentLevel,
+        summary: `Analysis complete: ${findings.length} findings.`
     };
+
 }
