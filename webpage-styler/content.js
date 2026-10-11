@@ -1,7 +1,7 @@
 
 console.log("Webpage Styler content script loaded!");
 
-// Apply dark mode to the current webpage
+// Apply dark mode to the current webpage and its media elements
 function enableDarkMode() {
     document.documentElement.style.filter = "invert(1) hue-rotate(180deg)";
 
