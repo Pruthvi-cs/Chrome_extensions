@@ -132,10 +132,23 @@
         } else if (findings.length > 0) {
             level = "REVIEW";
         }
+        console.log("[Mailshield URL Test]", {
+            url: rawUrl,
+            level,
+            findings
+        });
 
         return { level, findings };
     }
+        console.log(
+            "[Mailshield Test] HTTP:",
+            checkUrlRisk("http://example.com")
+        );
 
+        console.log(
+            "[Mailshield Test] HTTPS:",
+            checkUrlRisk("https://example.com")
+        );
     // Display a report without inserting email content as HTML.
     function showReport(email) {
         document.getElementById(PANEL_ID)?.remove();
