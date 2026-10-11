@@ -3,24 +3,36 @@ const analyzeBtn = document.getElementById("analyzeBtn");
 const emailHeaders = document.getElementById("emailHeaders");
 const results = document.getElementById("results");
 
-analyzeBtn.addEventListener("click", () => {
-    const rawHeaders = emailHeaders.value.trim();
+// Create a reusable section heading.
+function createHeading(text, level = 3) {
+    const heading = document.createElement(`h${level}`);
+    heading.textContent = text;
+    return heading;
+}
 
-    if (!rawHeaders) {
-        results.textContent = "Please paste email headers first.";
-        return;
-    }
+// Create a label and value row safely.
+function createInfoRow(label, value) {
+    const row = document.createElement("p");
+    const strong = document.createElement("strong");
 
-    const parsed = parseEmailHeaders(rawHeaders);
-    const analysis = analyzeEmailSecurity(parsed);
+    strong.textContent = `${label}: `;
+    row.appendChild(strong);
+    row.appendChild(
+        document.createTextNode(
+            Array.isArray(value) && value.length
+                ? value.join(", ")
+                : "Not found"
+        )
+    );
 
-    // Build the output using textContent to avoid interpreting
-    // pasted header content as HTML.
-    results.replaceChildren();
+    return row;
+}
 
-    const title = document.createElement("h3");
-    title.textContent = "Parsed Email Information";
-    results.appendChild(title);
+// Display the parsed email information.
+function renderParsedInformation(parsed) {
+    results.appendChild(
+        createHeading("Parsed Email Information")
+    );
 
     const fields = [
         ["From", parsed.from],
@@ -34,52 +46,100 @@ analyzeBtn.addEventListener("click", () => {
         ["DMARC results", parsed.dmarc]
     ];
 
-    for (const [label, values] of fields) {
-        const row = document.createElement("p");
-        const strong = document.createElement("strong");
-
-        strong.textContent = `${label}: `;
-        row.appendChild(strong);
-        row.appendChild(
-            document.createTextNode(
-                values.length ? values.join(", ") : "Not found"
-            )
-        );
-
-        results.appendChild(row);
+    for (const [label, value] of fields) {
+        results.appendChild(createInfoRow(label, value));
     }
 
-    const receivedTitle = document.createElement("h4");
-    receivedTitle.textContent = "Mail Delivery Path";
-    results.appendChild(receivedTitle);
+    results.appendChild(
+        createHeading("Mail Delivery Path", 4)
+    );
 
-    if (parsed.received.length) {
+    if (parsed.received.length > 0) {
         for (const received of parsed.received) {
             const row = document.createElement("p");
             row.textContent = received;
             results.appendChild(row);
         }
     } else {
-        const row = document.createElement("p");
-        row.textContent = "No Received headers found.";
-        results.appendChild(row);
+        results.appendChild(
+            createInfoRow("Received headers", [])
+        );
+    }
+}
+
+// Display security findings from the analyzer.
+function renderSecurityFindings(analysis) {
+    results.appendChild(
+        createHeading("Security Findings")
+    );
+
+    const summary = document.createElement("p");
+    summary.textContent = analysis.summary;
+    results.appendChild(summary);
+
+    if (!analysis.findings.length) {
+        const empty = document.createElement("p");
+        empty.textContent = "No findings were generated.";
+        results.appendChild(empty);
+        return;
+    }
+
+    for (const finding of analysis.findings) {
+        const card = document.createElement("section");
+        const title = document.createElement("h4");
+        const detail = document.createElement("p");
+
+        card.className = "finding-card";
+        card.dataset.severity = finding.severity;
+
+        title.textContent = finding.title;
+        detail.textContent = finding.detail;
+
+        card.append(title, detail);
+        results.appendChild(card);
+    }
+}
+
+// Analyze the supplied email headers.
+analyzeBtn.addEventListener("click", () => {
+    const rawHeaders = emailHeaders.value.trim();
+
+    // Clear old output before displaying new results.
+    results.replaceChildren();
+
+    if (!rawHeaders) {
+        results.textContent =
+            "Please paste email headers first.";
+        return;
+    }
+
+    if (
+        typeof parseEmailHeaders !== "function" ||
+        typeof analyzeEmailSecurity !== "function"
+    ) {
+        results.textContent =
+            "The analysis modules did not load. Check the script tags in popup.html.";
+        console.error(
+            "Missing parseEmailHeaders or analyzeEmailSecurity."
+        );
+        return;
+    }
+
+    try {
+        const parsed = parseEmailHeaders(rawHeaders);
+        const analysis = analyzeEmailSecurity(parsed);
+
+        renderParsedInformation(parsed);
+        renderSecurityFindings(analysis);
+
+        console.log("MailSentry analysis completed.", {
+            parsed,
+            analysis
+        });
+    } catch (error) {
+        console.error("MailSentry analysis failed:", error);
+
+        results.textContent =
+            "An error occurred while analyzing the headers. Check the popup console for details.";
     }
 });
-
-const findingsTitle = document.createElement("h3");
-findingsTitle.textContent = "Security Findings";
-results.appendChild(findingsTitle);
-
-for (const finding of analysis.findings) {
-    const card = document.createElement("section");
-    const heading = document.createElement("h4");
-    const detail = document.createElement("p");
-
-    heading.textContent = finding.title;
-    detail.textContent = finding.detail;
-
-    card.dataset.severity = finding.severity;
-    card.append(heading, detail);
-
-    results.appendChild(card);
-}
