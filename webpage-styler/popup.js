@@ -47,6 +47,7 @@ darkModeBtn.addEventListener("click", async () => {
     });
 });
 
+
 const highlightHeadingsBtn = document.getElementById("highlightHeadingsBtn");
 
 highlightHeadingsBtn.addEventListener("click", async () => {
@@ -60,32 +61,40 @@ highlightHeadingsBtn.addEventListener("click", async () => {
         return;
     }
 
-    await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        func: () => {
-            const headings = document.querySelectorAll("h1, h2, h3");
-            const isHighlighted =
-                document.documentElement.dataset.headingsHighlighted === "true";
+    try {
+        await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: () => {
+                const styleId = "webpage-styler-heading-highlight-style";
+                const existingStyle = document.getElementById(styleId);
 
-            headings.forEach((heading) => {
-                if (!isHighlighted) {
-                    // Save the original inline background color
-                    heading.dataset.originalBackground =
-                        heading.style.backgroundColor;
-
-                    heading.style.backgroundColor = "#ffeb3b";
-                    heading.style.color = "#111111";
-                } else {
-                    heading.style.backgroundColor =
-                        heading.dataset.originalBackground || "";
-
-                    heading.style.color = "";
-                    delete heading.dataset.originalBackground;
+                // If the stylesheet exists, remove it.
+                if (existingStyle) {
+                    existingStyle.remove();
+                    console.log("Heading highlights removed!");
+                    return;
                 }
-            });
 
-            document.documentElement.dataset.headingsHighlighted =
-                String(!isHighlighted);
-        }
-    });
+                // Create a temporary stylesheet.
+                const style = document.createElement("style");
+                style.id = styleId;
+
+                style.textContent = `
+                    h1, h2, h3 {
+                        background-color: #ffeb3b !important;
+                        color: #111111 !important;
+                        outline: 2px solid #f0c000 !important;
+                    }
+                `;
+
+                // Add the stylesheet to the current webpage.
+                (document.head || document.documentElement)
+                    .appendChild(style);
+
+                console.log("Heading highlights enabled!");
+            }
+        });
+    } catch (error) {
+        console.error("Unable to highlight headings:", error);
+    }
 });
