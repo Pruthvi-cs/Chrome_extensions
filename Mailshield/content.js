@@ -140,15 +140,6 @@
 
         return { level, findings };
     }
-        console.log(
-            "[Mailshield Test] HTTP:",
-            checkUrlRisk("http://example.com")
-        );
-
-        console.log(
-            "[Mailshield Test] HTTPS:",
-            checkUrlRisk("https://example.com")
-        );
     // Display a report without inserting email content as HTML.
     function showReport(email) {
         document.getElementById(PANEL_ID)?.remove();
