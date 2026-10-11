@@ -1,4 +1,3 @@
-```javascript
 function extractEmailAddress(value) {
     if (!value) return null;
 
@@ -249,4 +248,3 @@ function analyzeEmailSecurity(parsed) {
         summary: `Analysis complete: ${findings.length} findings.`
     };
 }
-```
