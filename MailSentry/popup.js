@@ -12,6 +12,7 @@ analyzeBtn.addEventListener("click", () => {
     }
 
     const parsed = parseEmailHeaders(rawHeaders);
+    const analysis = analyzeEmailSecurity(parsed);
 
     // Build the output using textContent to avoid interpreting
     // pasted header content as HTML.
