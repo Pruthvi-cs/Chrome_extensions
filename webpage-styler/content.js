@@ -27,3 +27,5 @@ function disableDarkMode() {
 
     console.log("Dark mode disabled!");
 }
+// Temporary automatic test
+enableDarkMode();
