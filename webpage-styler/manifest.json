@@ -1,0 +1,29 @@
+{
+    "manifest_version": 3,
+
+    "name": "Webpage Styler",
+
+    "version": "1.0",
+
+    "description": "Control the appearance of webpages.",
+
+    "permissions": [
+        "scripting",
+        "activeTab"
+    ],
+
+    "action": {
+        "default_popup": "popup.html"
+    },
+
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ]
+        }
+    ]
+}
