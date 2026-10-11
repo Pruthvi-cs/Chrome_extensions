@@ -280,7 +280,25 @@
                 url.className = "url";
                 url.textContent = link.url;
 
-                item.append(text, url);
+                
+                const risk = checkUrlRisk(link.url, link.text);
+
+                const riskLabel = document.createElement("div");
+                riskLabel.textContent = `${risk.level}: ${
+                    risk.findings.length
+                        ? risk.findings.join(" ")
+                        : "No obvious warning indicators detected."
+                }`;
+
+                riskLabel.style.marginTop = "4px";
+                riskLabel.style.fontWeight = "600";
+                riskLabel.style.color =
+                    risk.level === "HIGHER CONCERN" ? "#f87171" :
+                    risk.level === "REVIEW" ? "#fbbf24" :
+                    "#86efac";
+
+                item.append(text, url, riskLabel);
+
                 list.appendChild(item);
             });
         }
