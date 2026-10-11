@@ -53,6 +53,89 @@
         };
     }
 
+    // Step 7: Explainable, local URL risk checks.
+    function checkUrlRisk(rawUrl, displayedText = "") {
+        const findings = [];
+
+        let url;
+
+        try {
+            url = new URL(rawUrl);
+        } catch {
+            return {
+                level: "REVIEW",
+                findings: ["The link destination could not be parsed."]
+            };
+        }
+
+        const hostname = url.hostname.toLowerCase();
+        const visibleText = displayedText.trim().toLowerCase();
+
+        // HTTP does not encrypt the connection.
+        if (url.protocol === "http:") {
+            findings.push("Uses HTTP rather than HTTPS.");
+        }
+
+        // User information before @ can disguise the actual host.
+        if (url.username || url.password || rawUrl.includes("@")) {
+            findings.push("Contains an @ character or URL user information.");
+        }
+
+        // IP-address hosts deserve closer inspection.
+        const isIPv4 = /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname);
+        const isBracketedIPv6 = hostname.startsWith("[") &&
+                                hostname.endsWith("]");
+
+        if (isIPv4 || isBracketedIPv6) {
+            findings.push("Uses an IP address instead of a domain name.");
+        }
+
+        // Internationalized domains can contain lookalike characters.
+        if (hostname.startsWith("xn--") ||
+            hostname.split(".").some(part => part.startsWith("xn--"))) {
+            findings.push("Contains an internationalized domain label (punycode).");
+        }
+
+        // Compare a displayed URL with its actual destination when possible.
+        let displayedUrl;
+
+        try {
+            displayedUrl = new URL(displayedText);
+        } catch {
+            displayedUrl = null;
+        }
+
+        if (
+            displayedUrl &&
+            displayedUrl.hostname.toLowerCase() !== hostname
+        ) {
+            findings.push(
+                "The displayed URL hostname differs from the actual destination."
+            );
+        }
+
+        // Flag a few common deceptive hostname patterns for review.
+        if (
+            hostname.includes("xn--") ||
+            /\d{4,}/.test(hostname.split(".")[0]) ||
+            hostname.split(".").length >= 5
+        ) {
+            findings.push(
+                "The hostname has a pattern that may warrant closer inspection."
+            );
+        }
+
+        let level = "NO OBVIOUS FLAGS";
+
+        if (findings.length >= 3) {
+            level = "HIGHER CONCERN";
+        } else if (findings.length > 0) {
+            level = "REVIEW";
+        }
+
+        return { level, findings };
+    }
+
     // Display a report without inserting email content as HTML.
     function showReport(email) {
         document.getElementById(PANEL_ID)?.remove();
