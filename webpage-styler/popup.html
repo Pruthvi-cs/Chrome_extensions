@@ -5,12 +5,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Webpage Styler</title>
+    <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-    <h2>Webpage Styler</h2>
+    <main class="app">
 
-    <button id="darkModeBtn">Toggle Dark Mode</button>
-    <button id="highlightHeadingsBtn">Highlight Headings</button>
+        <header class="header">
+            <div class="brand">
+                <div class="brand-icon">✦</div>
+                <div>
+                    <h1>Webpage Styler</h1>
+                    <p>Make every page yours.</p>
+                </div>
+            </div>
+            <span class="version">BETA</span>
+        </header>
+
+        <div class="divider"></div>
+
+        <section class="tools-section">
+            <div class="section-heading">
+                <span class="eyebrow">YOUR TOOLS</span>
+                <span class="tool-count">02 FEATURES</span>
+            </div>
+
+            <!-- Dark Mode -->
+            <article class="feature-card">
+                <div class="feature-top">
+                    <div class="feature-icon dark-icon">☾</div>
+                    <div class="feature-info">
+                        <h2>Dark Mode</h2>
+                        <p>Give bright websites a darker look.</p>
+                    </div>
+                    <span class="feature-number">01</span>
+                </div>
+
+                <button id="darkModeBtn" class="action-button">
+                    <span>Toggle Dark Mode</span>
+                    <span class="button-arrow">↗</span>
+                </button>
+            </article>
+
+            <!-- Highlight Headings -->
+            <article class="feature-card">
+                <div class="feature-top">
+                    <div class="feature-icon highlight-icon">✎</div>
+                    <div class="feature-info">
+                        <h2>Highlight Headings</h2>
+                        <p>Find H1, H2 and H3 instantly.</p>
+                    </div>
+                    <span class="feature-number">02</span>
+                </div>
+
+                <button id="highlightHeadingsBtn" class="action-button">
+                    <span>Highlight Headings</span>
+                    <span class="button-arrow">↗</span>
+                </button>
+            </article>
+        </section>
+
+        <footer class="footer">
+            <div class="footer-icon">⚡</div>
+            <span>Lightweight tools. Instant changes.</span>
+            <span class="footer-version">v1.0</span>
+        </footer>
+
+    </main>
 
     <script src="popup.js"></script>
 </body>
