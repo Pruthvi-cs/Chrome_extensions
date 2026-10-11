@@ -1,6 +1,5 @@
-
 function parseEmailHeaders(rawHeaders) {
-    const result = {
+    const parsed = {
         from: [],
         replyTo: [],
         returnPath: [],
@@ -14,18 +13,19 @@ function parseEmailHeaders(rawHeaders) {
         dmarc: []
     };
 
-    if (typeof rawHeaders !== "string" || !rawHeaders.trim()) {
-        return result;
+    if (typeof rawHeaders !== "string") {
+        return parsed;
     }
 
-    // Join folded header lines with their preceding header.
-    const unfoldedHeaders = rawHeaders.replace(
-        /\r?\n[ \t]+/g,
-        " "
-    );
+    // Normalize line endings and unfold continuation lines.
+    const normalized = rawHeaders
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n")
+        .replace(/\n[ \t]+/g, " ");
 
-    const lines = unfoldedHeaders.split(/\r?\n/);
+    const lines = normalized.split("\n");
 
+    // Parse one header per line.
     for (const line of lines) {
         const separator = line.indexOf(":");
 
@@ -33,75 +33,80 @@ function parseEmailHeaders(rawHeaders) {
             continue;
         }
 
-        const name = line.slice(0, separator).trim().toLowerCase();
-        const value = line.slice(separator + 1).trim();
+        const name = line
+            .slice(0, separator)
+            .trim()
+            .toLowerCase();
+
+        const value = line
+            .slice(separator + 1)
+            .trim();
+
+        if (!value) {
+            continue;
+        }
 
         switch (name) {
             case "from":
-                result.from.push(value);
+                parsed.from.push(value);
                 break;
 
             case "reply-to":
-                result.replyTo.push(value);
+                parsed.replyTo.push(value);
                 break;
 
             case "return-path":
-                result.returnPath.push(value);
+                parsed.returnPath.push(value);
                 break;
 
             case "received":
-                result.received.push(value);
+                parsed.received.push(value);
                 break;
 
             case "authentication-results":
-                result.authenticationResults.push(value);
+                parsed.authenticationResults.push(value);
+                break;
+
+            case "received-spf":
+                parsed.spf.push(value);
                 break;
 
             case "message-id":
-                result.messageId.push(value);
+                parsed.messageId.push(value);
                 break;
 
             case "date":
-                result.date.push(value);
+                parsed.date.push(value);
                 break;
 
             case "subject":
-                result.subject.push(value);
+                parsed.subject.push(value);
                 break;
-        }
-
-        // Extract explicit authentication results.
-        if (
-            name === "authentication-results" ||
-            name === "received-spf"
-        ) {
-            const spfMatches = value.matchAll(
-                /\bspf\s*=\s*(pass|fail|softfail|neutral|none|temperror|permerror)\b/gi
-            );
-
-            for (const match of spfMatches) {
-                result.spf.push(match[1].toLowerCase());
-            }
-        }
-
-        if (name === "authentication-results") {
-            const dkimMatches = value.matchAll(
-                /\bdkim\s*=\s*(pass|fail|softfail|neutral|none|temperror|permerror|policy|permerror)\b/gi
-            );
-
-            for (const match of dkimMatches) {
-                result.dkim.push(match[1].toLowerCase());
-            }
-
-            const dmarcMatches = value.matchAll(
-                /\bdmarc\s*=\s*(pass|fail|bestguesspass|none|temperror|permerror)\b/gi
-            );
-
-            for (const match of dmarcMatches) {
-                result.dmarc.push(match[1].toLowerCase());
-            }
         }
     }
 
-    return result;
+    // Extract authentication outcomes from Authentication-Results.
+    const authText = parsed.authenticationResults.join("; ");
+
+    for (const protocol of ["spf", "dkim", "dmarc"]) {
+        const expression = new RegExp(
+            `(?:^|[;\\s])${protocol}\\s*=\\s*` +
+            `(pass|fail|softfail|neutral|none|temperror|permerror)` +
+            `(?=\\s|;|$)`,
+            "gi"
+        );
+
+        for (const match of authText.matchAll(expression)) {
+            parsed[protocol].push(
+                `${protocol}=${match[1].toLowerCase()}`
+            );
+        }
+    }
+
+    // Remove duplicate values without changing their order.
+    for (const key of Object.keys(parsed)) {
+        parsed[key] = [...new Set(parsed[key])];
+    }
+
+    return parsed;
 }
