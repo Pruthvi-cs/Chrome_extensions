@@ -2,7 +2,6 @@
     "use strict";
 
     const BUTTON_ID = "mailshield-analyze-button";
-    const MESSAGE_BODY_SELECTOR = ".a3s";
 
     function createAnalyzeButton() {
         const button = document.createElement("button");
@@ -31,7 +30,6 @@
 
         button.addEventListener("click", () => {
             console.log("Mailshield: Analyze button clicked.");
-
             button.textContent = "✓ Button working!";
         });
 
@@ -39,43 +37,58 @@
     }
 
     function addButtonToOpenEmail() {
-        const messageBodies = document.querySelectorAll(
-            MESSAGE_BODY_SELECTOR
-        );
+        const bodies = document.querySelectorAll(".a3s");
 
-        for (const body of messageBodies) {
+        for (const body of bodies) {
             const rect = body.getBoundingClientRect();
 
-            // Ignore hidden or collapsed message bodies.
-            if (rect.width === 0 || rect.height === 0) {
+            if (
+                !body.isConnected ||
+                rect.width === 0 ||
+                rect.height === 0 ||
+                !body.parentElement
+            ) {
                 continue;
             }
 
-            const messageContainer = body.closest(".gs");
+            const container = body.closest(".adn");
 
-            if (!messageContainer) {
+            if (!container || container.querySelector(`#${BUTTON_ID}`)) {
                 continue;
             }
 
-            // Prevent duplicate buttons.
-            if (messageContainer.querySelector(`#${BUTTON_ID}`)) {
-                continue;
-            }
-
+            // Insert into the body's actual parent, not an ancestor.
             const button = createAnalyzeButton();
 
-            // Insert before the email body so it is easy to find.
-            messageContainer.insertBefore(button, body);
+            try {
+                body.parentElement.insertBefore(button, body);
 
-            console.log(
-                "Mailshield: Analyze button added to an open email."
-            );
+                console.log(
+                    "Mailshield: Analyze button added to an open email."
+                );
+            } catch (error) {
+                console.warn(
+                    "Mailshield: Could not place the button; Gmail may have updated the message.",
+                    error
+                );
+            }
         }
     }
 
-    const observer = new MutationObserver(() => {
-        addButtonToOpenEmail();
-    });
+    let scheduled = false;
+
+    function scheduleButtonCheck() {
+        if (scheduled) return;
+
+        scheduled = true;
+
+        requestAnimationFrame(() => {
+            scheduled = false;
+            addButtonToOpenEmail();
+        });
+    }
+
+    const observer = new MutationObserver(scheduleButtonCheck);
 
     observer.observe(document.body, {
         childList: true,
