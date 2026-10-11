@@ -65,3 +65,21 @@ analyzeBtn.addEventListener("click", () => {
         results.appendChild(row);
     }
 });
+
+const findingsTitle = document.createElement("h3");
+findingsTitle.textContent = "Security Findings";
+results.appendChild(findingsTitle);
+
+for (const finding of analysis.findings) {
+    const card = document.createElement("section");
+    const heading = document.createElement("h4");
+    const detail = document.createElement("p");
+
+    heading.textContent = finding.title;
+    detail.textContent = finding.detail;
+
+    card.dataset.severity = finding.severity;
+    card.append(heading, detail);
+
+    results.appendChild(card);
+}
