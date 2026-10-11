@@ -26,4 +26,4 @@ function disableDarkMode() {
     });
 
     console.log("Dark mode disabled!");
-}
+}   
