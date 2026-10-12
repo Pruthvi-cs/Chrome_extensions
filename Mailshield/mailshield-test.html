@@ -22,7 +22,7 @@
 
     .container {
       width: 100%;
-      max-width: 900px;
+      max-width: 950px;
       margin: auto;
     }
 
@@ -32,7 +32,7 @@
 
     .brand {
       color: #60a5fa;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
       letter-spacing: 2px;
       text-transform: uppercase;
@@ -43,9 +43,17 @@
       font-size: 32px;
     }
 
+    h2 {
+      margin-top: 0;
+    }
+
+    h3 {
+      margin-top: 24px;
+    }
+
     .subtitle {
       color: #9ca3af;
-      line-height: 1.6;
+      line-height: 1.7;
     }
 
     .panel {
@@ -64,7 +72,7 @@
 
     textarea {
       width: 100%;
-      min-height: 250px;
+      min-height: 280px;
       padding: 14px;
       resize: vertical;
       border: 1px solid #374151;
@@ -74,7 +82,7 @@
       color: #d1fae5;
       font-family: Consolas, monospace;
       font-size: 13px;
-      line-height: 1.6;
+      line-height: 1.7;
     }
 
     textarea:focus {
@@ -96,6 +104,15 @@
       font-weight: bold;
     }
 
+    button:hover {
+      opacity: 0.88;
+    }
+
+    button:focus-visible {
+      outline: 2px solid #93c5fd;
+      outline-offset: 3px;
+    }
+
     .primary {
       background: #2563eb;
       color: white;
@@ -106,14 +123,11 @@
       color: #e5e7eb;
     }
 
-    button:hover {
-      opacity: 0.88;
-    }
-
     #status {
       margin-top: 12px;
       color: #9ca3af;
       font-size: 13px;
+      line-height: 1.6;
     }
 
     #results {
@@ -126,6 +140,7 @@
       background: #0b1220;
       border: 1px solid #263244;
       border-radius: 9px;
+      line-height: 1.7;
     }
 
     .field {
@@ -158,7 +173,7 @@
       padding: 12px;
       margin-top: 8px;
       border-radius: 7px;
-      line-height: 1.6;
+      line-height: 1.7;
       overflow-wrap: anywhere;
     }
 
@@ -174,6 +189,54 @@
       color: #bbf7d0;
     }
 
+    .finding.neutral {
+      background: #172033;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px;
+      margin-top: 10px;
+      border: 1px solid #263244;
+      border-radius: 9px;
+      background: #0b1220;
+    }
+
+    .step-number {
+      flex-shrink: 0;
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #1d4ed8;
+      color: white;
+      font-weight: bold;
+    }
+
+    .step-content {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .step-content strong {
+      display: block;
+      margin-bottom: 6px;
+      overflow-wrap: anywhere;
+    }
+
+    .step-content p {
+      margin: 0;
+      color: #9ca3af;
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
     .notice {
       padding: 15px;
       background: #291b12;
@@ -181,19 +244,20 @@
       border-radius: 9px;
       color: #fed7aa;
       font-size: 13px;
-      line-height: 1.7;
+      line-height: 1.8;
     }
 
-    .empty {
+    .muted {
       color: #9ca3af;
-      line-height: 1.6;
+      font-size: 13px;
+      line-height: 1.7;
     }
 
     footer {
       padding: 8px 0;
       color: #6b7280;
       font-size: 12px;
-      line-height: 1.6;
+      line-height: 1.7;
     }
   </style>
 </head>
@@ -204,8 +268,8 @@
       <div class="brand">Mailshield / Digital Forensics</div>
       <h1>Email Header Analyzer</h1>
       <p class="subtitle">
-        Parse raw email headers, inspect repeated fields, and identify
-        sender-address domain differences for further investigation.
+        Parse email headers, compare sender addresses, inspect repeated
+        Received fields, and reconstruct an apparent mail-server relay path.
       </p>
     </header>
 
@@ -215,7 +279,7 @@
       <textarea
         id="rawHeaders"
         spellcheck="false"
-        placeholder="Paste the raw email headers here..."
+        placeholder="Paste raw email headers here..."
       ></textarea>
 
       <div class="actions">
@@ -233,7 +297,7 @@
       </div>
 
       <div id="status" role="status" aria-live="polite">
-        Ready. Paste headers or load the sample.
+        Ready. Paste headers or load the test sample.
       </div>
     </section>
 
@@ -245,6 +309,16 @@
       <h3>Sender Identity Review</h3>
       <div id="identityReview"></div>
 
+      <h3>Received Header Analysis</h3>
+      <p class="muted">
+        Received fields are shown in their original header order.
+        The apparent path is reconstructed in reverse field order,
+        oldest first. This is a heuristic, not a verified network route.
+      </p>
+
+      <div id="receivedSummary"></div>
+      <div id="relayPath"></div>
+
       <h3>Parsed Header Fields</h3>
       <div id="fields"></div>
     </section>
@@ -252,10 +326,13 @@
     <section class="notice">
       <strong>Important security limitation</strong><br>
       This tool parses pasted text only. Header values, including
-      Authentication-Results, can be forged in untrusted data.
-      A From/Reply-To/Return-Path domain difference is not proof of
-      phishing. This tool does not verify SPF, DKIM, DMARC, message
-      signatures, or the authenticity of the receiving mail server.
+      Authentication-Results, may be forged. A sender-domain mismatch
+      or unusual Received field does not prove phishing.
+
+      This page does not verify SPF, DKIM, DMARC, message signatures,
+      IP ownership, DNS records, server identity, or the authenticity
+      of the receiving mail system. Received-header analysis is a
+      preliminary review aid, not a security verdict.
     </section>
 
     <footer>
@@ -271,27 +348,29 @@
     const sampleBtn = document.getElementById("sampleBtn");
     const clearBtn = document.getElementById("clearBtn");
     const status = document.getElementById("status");
+
     const results = document.getElementById("results");
     const summary = document.getElementById("summary");
     const identityReview = document.getElementById("identityReview");
+    const receivedSummary = document.getElementById("receivedSummary");
+    const relayPath = document.getElementById("relayPath");
     const fieldsContainer = document.getElementById("fields");
 
     const sampleHeaders = `From: alerts@example.org
 Reply-To: support@example.net
 Return-Path: <bounce@example.org>
 To: analyst@example.com
-Subject: Mailshield Identity Test
-Received: from relay-a.example.org by relay-b.example.org
+Subject: Mailshield Received Header Test
+Received: from relay-a.example.org (relay-a.example.org [192.0.2.10]) by relay-b.example.org with ESMTPS id abc123; Mon, 12 Oct 2026 10:30:00 +0000
+Received: from sender.example.org (sender.example.org [192.0.2.20]) by relay-a.example.org with ESMTPS id def456; Mon, 12 Oct 2026 10:29:00 +0000
 Authentication-Results: mx.example.org;
     spf=pass smtp.mailfrom=example.org;
     dkim=pass header.d=example.org;
     dmarc=pass header.from=example.org`;
 
     /*
-     * Parse raw headers:
-     * - Normalize line endings.
-     * - Unfold continuation lines.
-     * - Preserve repeated header fields.
+     * STEP A: Parse the raw headers.
+     * Preserve repeated fields and unfold continuation lines.
      */
     function parseRawHeaders(rawText) {
       const fields = Object.create(null);
@@ -326,8 +405,6 @@ Authentication-Results: mx.example.org;
         const name = line.slice(0, separator).trim();
         const value = line.slice(separator + 1).trim();
 
-        // Header field names use printable ASCII characters,
-        // excluding the colon and whitespace.
         if (!/^[!-9;-~]+$/.test(name)) {
           continue;
         }
@@ -345,8 +422,8 @@ Authentication-Results: mx.example.org;
     }
 
     /*
-     * Extract a basic email address from a header value.
-     * This is a lightweight parser, not a complete RFC email parser.
+     * STEP B: Basic email address extraction.
+     * This is intentionally not a full RFC email parser.
      */
     function extractAddress(value) {
       if (!value) {
@@ -355,16 +432,11 @@ Authentication-Results: mx.example.org;
 
       const input = value.trim();
       const angleAddress = input.match(/<([^<>]+)>/);
-
       const candidate = angleAddress
         ? angleAddress[1].trim()
         : input;
 
-      const match = candidate.match(
-        /^[^@\s<>]+@[^@\s<>]+$/
-      );
-
-      if (!match) {
+      if (!/^[^@\s<>]+@[^@\s<>]+$/.test(candidate)) {
         return "";
       }
 
@@ -388,8 +460,8 @@ Authentication-Results: mx.example.org;
     }
 
     /*
-     * Add a result card using textContent to avoid treating
-     * pasted header values as HTML.
+     * Shared safe renderer.
+     * Untrusted header text is displayed as text, never HTML.
      */
     function addField(container, name, value) {
       const card = document.createElement("div");
@@ -415,8 +487,7 @@ Authentication-Results: mx.example.org;
     }
 
     /*
-     * Compare From, Reply-To and Return-Path domains.
-     * Differences are review signals, not verdicts.
+     * STEP C: Compare From, Reply-To and Return-Path domains.
      */
     function renderIdentityReview(fields) {
       identityReview.replaceChildren();
@@ -431,8 +502,8 @@ Authentication-Results: mx.example.org;
 
       if (!fromAddress) {
         findings.push(
-          "A usable From email address could not be extracted. " +
-          "No From-domain comparison was performed."
+          "A usable From address could not be extracted. " +
+          "The sender-domain comparison is incomplete."
         );
       }
 
@@ -443,8 +514,8 @@ Authentication-Results: mx.example.org;
       ) {
         findings.push(
           `Reply-To domain differs from From domain: ` +
-          `${fromAddress} vs ${replyAddress}. Review the reason ` +
-          `for this difference; it can be legitimate.`
+          `${fromAddress} vs ${replyAddress}. Review the context; ` +
+          `this difference can be legitimate.`
         );
       }
 
@@ -454,8 +525,8 @@ Authentication-Results: mx.example.org;
         !replyAddress
       ) {
         findings.push(
-          "Reply-To is present, but a usable email address could " +
-          "not be extracted from its first value."
+          "Reply-To is present, but its first value could not be " +
+          "parsed as a simple email address."
         );
       }
 
@@ -477,8 +548,8 @@ Authentication-Results: mx.example.org;
         !returnPathAddress
       ) {
         findings.push(
-          "Return-Path is present, but a usable email address " +
-          "could not be extracted from its first value."
+          "Return-Path is present, but its first value could not " +
+          "be parsed as a simple email address."
         );
       }
 
@@ -495,19 +566,281 @@ Authentication-Results: mx.example.org;
         }
       }
 
-      const comparison = document.createElement("p");
-      comparison.className = "empty";
-      comparison.textContent =
-        `From: ${fromAddress || "Not parsed"} · ` +
-        `Reply-To: ${replyAddress || "Not parsed"} · ` +
-        `Return-Path: ${returnPathAddress || "Not parsed"}`;
-
-      identityReview.appendChild(comparison);
+      addFinding(
+        identityReview,
+        `From: ${fromAddress || "Not parsed"} | ` +
+        `Reply-To: ${replyAddress || "Not parsed"} | ` +
+        `Return-Path: ${returnPathAddress || "Not parsed"}`,
+        "neutral"
+      );
     }
 
+    /*
+     * STEP D: Parse each Received field.
+     *
+     * Typical simplified example:
+     * Received: from sender.example.org by relay.example.org;
+     *           Mon, 12 Oct 2026 10:00:00 +0000
+     *
+     * Real Received syntax is more complex. This parser deliberately
+     * extracts only simple from/by tokens for preliminary inspection.
+     */
+    function parseReceivedHeader(value, originalIndex) {
+      const fromMatch = value.match(
+        /(?:^|\s)from\s+([^\s();]+)/i
+      );
+
+      const byMatch = value.match(
+        /(?:^|\s)by\s+([^\s();]+)/i
+      );
+
+      const dateParts = value.split(";");
+      const hasDateSection =
+        dateParts.length > 1 && dateParts.slice(1).join(";").trim() !== "";
+
+      const fromHost = fromMatch
+        ? fromMatch[1].replace(/[.,]+$/, "")
+        : "";
+
+      const byHost = byMatch
+        ? byMatch[1].replace(/[.,]+$/, "")
+        : "";
+
+      const notes = [];
+
+      if (!fromHost) {
+        notes.push(
+          "Could not extract a simple 'from' host. The syntax may be complex."
+        );
+      }
+
+      if (!byHost) {
+        notes.push(
+          "Could not extract a simple 'by' host. The syntax may be complex."
+        );
+      }
+
+      if (
+        fromHost &&
+        byHost &&
+        fromHost.toLowerCase() === byHost.toLowerCase()
+      ) {
+        notes.push(
+          "The extracted from and by hosts are identical; review the context."
+        );
+      }
+
+      if (!hasDateSection) {
+        notes.push(
+          "No semicolon-separated date section was detected. This alone is not proof of a problem."
+        );
+      }
+
+      return {
+        originalIndex,
+        raw: value,
+        fromHost,
+        byHost,
+        hasDateSection,
+        notes
+      };
+    }
+
+    /*
+     * STEP E: Build an apparent relay path.
+     *
+     * Received fields are normally prepended by receiving servers,
+     * so the first field is generally the newest. Reverse the field
+     * list to approximate oldest-to-newest traversal.
+     *
+     * This is a heuristic. Do not use it as proof of the real route.
+     */
+    function renderReceivedAnalysis(fields) {
+      receivedSummary.replaceChildren();
+      relayPath.replaceChildren();
+
+      const receivedValues = fields["received"] || [];
+
+      if (receivedValues.length === 0) {
+        addFinding(
+          receivedSummary,
+          "No Received headers were found. A relay path cannot be reconstructed from this input.",
+          "neutral"
+        );
+
+        addFinding(
+          relayPath,
+          "No apparent relay path available.",
+          "neutral"
+        );
+
+        return;
+      }
+
+      const parsed = receivedValues.map(
+        (value, index) => parseReceivedHeader(value, index)
+      );
+
+      addFinding(
+        receivedSummary,
+        `Received headers found: ${parsed.length}. ` +
+        `They are displayed below in their original order, usually newest first.`,
+        "info"
+      );
+
+      /*
+       * Display the apparent path oldest to newest.
+       * Only use the extracted from/by tokens; do not claim verification.
+       */
+      const chronological = [...parsed].reverse();
+      const pathNodes = [];
+
+      function pushNode(host, sourceIndex) {
+        if (!host) {
+          return;
+        }
+
+        const previous = pathNodes[pathNodes.length - 1];
+
+        if (
+          previous &&
+          previous.host.toLowerCase() === host.toLowerCase()
+        ) {
+          return;
+        }
+
+        pathNodes.push({
+          host,
+          sourceIndex
+        });
+      }
+
+      for (const record of chronological) {
+        pushNode(record.fromHost, record.originalIndex);
+
+        pushNode(record.byHost, record.originalIndex);
+      }
+
+      const pathTitle = document.createElement("div");
+      pathTitle.className = "field-name";
+      pathTitle.textContent =
+        "Apparent relay path · oldest to newest";
+
+      relayPath.appendChild(pathTitle);
+
+      if (pathNodes.length === 0) {
+        addFinding(
+          relayPath,
+          "The Received fields were found, but no simple relay path could be extracted. Inspect the original values below.",
+          "warning"
+        );
+      } else {
+        for (let index = 0; index < pathNodes.length; index++) {
+          const node = pathNodes[index];
+
+          const step = document.createElement("div");
+          step.className = "step";
+
+          const number = document.createElement("div");
+          number.className = "step-number";
+          number.textContent = String(index + 1);
+
+          const content = document.createElement("div");
+          content.className = "step-content";
+
+          const title = document.createElement("strong");
+          title.textContent = node.host;
+
+          const description = document.createElement("p");
+
+          if (index === 0) {
+            description.textContent =
+              "First extracted host in the reconstructed apparent path.";
+          } else if (index === pathNodes.length - 1) {
+            description.textContent =
+              "Last extracted host in the reconstructed apparent path.";
+          } else {
+            description.textContent =
+              "Extracted host in the apparent relay sequence.";
+          }
+
+          content.append(title, description);
+          step.append(number, content);
+          relayPath.appendChild(step);
+        }
+      }
+
+      addFinding(
+        relayPath,
+        "Interpretation caution: this path is inferred from simple host tokens. Received fields can be forged before a trusted server adds its own header, and complex syntax may not be fully parsed.",
+        "neutral"
+      );
+
+      /*
+       * Review notes for individual Received fields.
+       */
+      const reviewTitle = document.createElement("h3");
+      reviewTitle.textContent =
+        "Received Header Review Notes";
+
+      relayPath.appendChild(reviewTitle);
+
+      for (const record of parsed) {
+        const label = `Received field ${record.originalIndex + 1}`;
+
+        if (record.notes.length === 0) {
+          addFinding(
+            relayPath,
+            `${label}: Simple from/by hosts were extracted. ` +
+            `This does not verify that the hosts are genuine.`,
+            "info"
+          );
+        } else {
+          for (const note of record.notes) {
+            addFinding(
+              relayPath,
+              `${label}: ${note}`,
+              "warning"
+            );
+          }
+        }
+      }
+
+      /*
+       * Compare adjacent extracted server relationships.
+       * This is only a heuristic and may be inconclusive for
+       * gateways, relays, and unusual mail infrastructure.
+       */
+      for (let index = 0; index < chronological.length - 1; index++) {
+        const older = chronological[index];
+        const newer = chronological[index + 1];
+
+        if (
+          older.byHost &&
+          newer.fromHost &&
+          older.byHost.toLowerCase() !== newer.fromHost.toLowerCase()
+        ) {
+          addFinding(
+            relayPath,
+            `Review possible relay discontinuity between chronological ` +
+            `Received fields ${older.originalIndex + 1} and ` +
+            `${newer.originalIndex + 1}: older 'by' host ` +
+            `"${older.byHost}" differs from newer 'from' host ` +
+            `"${newer.fromHost}". This can be legitimate and is not proof of spoofing.`,
+            "warning"
+          );
+        }
+      }
+    }
+
+    /*
+     * STEP F: Render all parsed fields, preserving repeated values.
+     */
     function renderResults(fields) {
       fieldsContainer.replaceChildren();
       identityReview.replaceChildren();
+      receivedSummary.replaceChildren();
+      relayPath.replaceChildren();
 
       const fieldNames = Object.keys(fields);
 
@@ -526,12 +859,13 @@ Authentication-Results: mx.example.org;
           "No valid header fields were found. Check the pasted format.",
           "warning"
         );
+
         results.style.display = "block";
         return;
       }
 
-      // This call ensures the identity review is always rendered.
       renderIdentityReview(fields);
+      renderReceivedAnalysis(fields);
 
       const preferredOrder = [
         "from",
@@ -558,7 +892,6 @@ Authentication-Results: mx.example.org;
       for (const name of orderedNames) {
         const values = fields[name];
 
-        // Keep repeated fields visible and clearly separated.
         const combinedValues = values
           .map((value, index) =>
             `[Value ${index + 1}]\n${value}`
@@ -571,11 +904,16 @@ Authentication-Results: mx.example.org;
       results.style.display = "block";
     }
 
+    /*
+     * STEP G: Analyze the textarea contents.
+     */
     function analyzeHeaders() {
       const rawText = rawHeadersInput.value.trim();
 
       if (!rawText) {
-        status.textContent = "Please paste some email headers first.";
+        status.textContent =
+          "Please paste email headers or load the test sample.";
+
         results.style.display = "none";
         rawHeadersInput.focus();
         return;
@@ -594,8 +932,9 @@ Authentication-Results: mx.example.org;
           `Analysis complete. Parsed ${count} header field instances.`;
       } catch (error) {
         console.error("Mailshield header analysis error:", error);
+
         status.textContent =
-          "An error occurred while analyzing the headers. Check the browser console.";
+          "Analysis failed. Open the browser console to inspect the error.";
       }
     }
 
@@ -604,21 +943,27 @@ Authentication-Results: mx.example.org;
     sampleBtn.addEventListener("click", () => {
       rawHeadersInput.value = sampleHeaders;
       status.textContent =
-        "Sample loaded. Click Analyze Headers to run the test.";
+        "Test sample loaded. Click Analyze Headers to run the analysis.";
+
       results.style.display = "none";
     });
 
     clearBtn.addEventListener("click", () => {
       rawHeadersInput.value = "";
+
       fieldsContainer.replaceChildren();
       identityReview.replaceChildren();
+      receivedSummary.replaceChildren();
+      relayPath.replaceChildren();
+
       summary.textContent = "";
       results.style.display = "none";
+
       status.textContent = "Cleared. Ready for another test.";
       rawHeadersInput.focus();
     });
 
-    // Load the sample on first opening for convenient testing.
+    // Load a multi-Received test sample when the page opens.
     rawHeadersInput.value = sampleHeaders;
   </script>
 </body>
