@@ -475,8 +475,49 @@ function checkUrlRisk(rawUrl, displayedText = "") {
             status.className = "status";
             status.textContent = result.destinationStatus;
 
-            const findings = document.createElement("ul");
-            findings.className = "findings";
+           
+const findings = document.createElement("ul");
+findings.className = "findings";
+
+function addSection(title, items, emptyMessage) {
+    const section = document.createElement("div");
+
+    const heading = document.createElement("div");
+    heading.className = "label";
+    heading.textContent = title;
+    section.appendChild(heading);
+
+    const list = document.createElement("ul");
+    list.className = "findings";
+
+    const entries = items.length ? items : [emptyMessage];
+
+    entries.forEach(message => {
+        const item = document.createElement("li");
+        item.textContent = message;
+        list.appendChild(item);
+    });
+
+    section.appendChild(list);
+    return section;
+}
+
+card.appendChild(
+    addSection(
+        "Security indicators",
+        result.findings,
+        "No obvious security indicators detected by current rules."
+    )
+);
+
+card.appendChild(
+    addSection(
+        "Link behavior indicators",
+        result.trackingSignals,
+        "No obvious tracking indicators detected."
+    )
+);
+
 
             if (result.findings.length === 0) {
                 const item = document.createElement("li");
