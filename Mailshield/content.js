@@ -11,187 +11,179 @@
     // 1. URL ANALYSIS — local rules only; never follows redirects.
     // ============================================================
 
-    function checkUrlRisk(rawUrl, displayedText = "") {
-        const findings = [];
+function checkUrlRisk(rawUrl, displayedText = "") {
+    const securityFindings = [];
+    const trackingSignals = [];
 
-        let url;
+    let url;
 
-        try {
-            url = new URL(rawUrl);
-        } catch {
-            return {
-                level: "REVIEW",
-                category: "Unrecognized URL",
-                destinationStatus: "Destination could not be parsed.",
-                findings: ["The link destination is not a valid URL."]
-            };
-        }
+    try {
+        url = new URL(rawUrl);
+    } catch {
+        return {
+            level: "REVIEW",
+            category: "Unrecognized URL",
+            destinationStatus: "Destination could not be parsed.",
+            findings: ["The link destination is not a valid URL."],
+            trackingSignals: []
+        };
+    }
 
-        if (!["http:", "https:"].includes(url.protocol)) {
-            return {
-                level: "REVIEW",
-                category: "Non-web link",
-                destinationStatus: "Not assessed by web URL checks.",
-                findings: [
-                    `The link uses the ${url.protocol} protocol, which this web URL checker does not assess.`
-                ]
-            };
-        }
+    if (!["http:", "https:"].includes(url.protocol)) {
+        return {
+            level: "REVIEW",
+            category: "Non-web link",
+            destinationStatus: "Not assessed by web URL checks.",
+            findings: [
+                `Uses the ${url.protocol} protocol, which this checker does not assess.`
+            ],
+            trackingSignals: []
+        };
+    }
 
-        const hostname = url.hostname.toLowerCase();
+    const hostname = url.hostname.toLowerCase();
 
-        // Check for unencrypted HTTP.
-        if (url.protocol === "http:") {
-            findings.push(
-                "Uses HTTP rather than HTTPS; the connection is not protected by HTTPS."
-            );
-        }
-
-        // Check actual URL credentials, not every @ in the URL.
-        if (url.username || url.password) {
-            findings.push(
-                "Contains URL user information before the hostname, which can be misleading."
-            );
-        }
-
-        // Detect IPv4 or bracketed IPv6 hostnames.
-        const isIPv4 =
-            /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname);
-
-        const isIPv6 =
-            hostname.startsWith("[") &&
-            hostname.endsWith("]");
-
-        if (isIPv4 || isIPv6) {
-            findings.push(
-                "Uses an IP address instead of a conventional domain name."
-            );
-        }
-
-        // Detect internationalized domain labels encoded as punycode.
-        if (
-            hostname.split(".").some(label =>
-                label.startsWith("xn--")
-            )
-        ) {
-            findings.push(
-                "Contains an internationalized domain label (punycode); inspect the domain carefully."
-            );
-        }
-
-        // Compare actual hostname with displayed text when it is a URL.
-        const visibleText = displayedText.trim();
-        let visibleUrl = null;
-
-        try {
-            if (/^https?:\/\//i.test(visibleText)) {
-                visibleUrl = new URL(visibleText);
-            } else if (/^www\./i.test(visibleText)) {
-                visibleUrl = new URL(`https://${visibleText}`);
-            }
-        } catch {
-            visibleUrl = null;
-        }
-
-        if (
-            visibleUrl &&
-            visibleUrl.hostname.toLowerCase() !== hostname
-        ) {
-            findings.push(
-                "The URL shown in the email has a different hostname from the actual link destination."
-            );
-        }
-
-        // Identify possible tracking and redirect patterns.
-        const trackingSignals = [];
-
-        const trackingHostPatterns = [
-            /(^|[.-])click([.-]|$)/i,
-            /(^|[.-])track(ing)?([.-]|$)/i,
-            /(^|[.-])redirect([.-]|$)/i,
-            /(^|[.-])emailclick([.-]|$)/i,
-            /(^|[.-])linktrack([.-]|$)/i
-        ];
-
-        if (
-            trackingHostPatterns.some(pattern =>
-                pattern.test(hostname)
-            )
-        ) {
-            trackingSignals.push(
-                "Hostname contains a common click-tracking or redirect pattern."
-            );
-        }
-
-        const path = url.pathname.toLowerCase();
-
-        if (
-            /\/(emailclick|clicktrack|click|redirect|track|tracking)(\/|$)/i.test(path)
-        ) {
-            trackingSignals.push(
-                "URL path contains a common click-tracking or redirect pattern."
-            );
-        }
-
-        // A few known marketing platforms commonly use tracked links.
-        // Their presence does NOT mean a link is malicious.
-        const knownMarketingHosts = [
-            "moengage.com",
-            "sendgrid.net",
-            "mailchimp.com",
-            "list-manage.com",
-            "mailgun.org"
-        ];
-
-        const isMarketingHost = knownMarketingHosts.some(domain =>
-            hostname === domain || hostname.endsWith(`.${domain}`)
+    // Security indicators
+    if (url.protocol === "http:") {
+        securityFindings.push(
+            "Uses HTTP instead of HTTPS."
         );
+    }
 
-        if (isMarketingHost) {
-            trackingSignals.push(
-                "Host belongs to a domain commonly used for email or marketing services."
-            );
+    if (url.username || url.password) {
+        securityFindings.push(
+            "Contains URL credentials that could be misleading."
+        );
+    }
+
+    const isIPv4 =
+        /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname);
+
+    const isIPv6 =
+        hostname.startsWith("[") &&
+        hostname.endsWith("]");
+
+    if (isIPv4 || isIPv6) {
+        securityFindings.push(
+            "Uses an IP address instead of a conventional domain name."
+        );
+    }
+
+    if (
+        hostname.split(".").some(label =>
+            label.startsWith("xn--")
+        )
+    ) {
+        securityFindings.push(
+            "Contains a punycode domain label; inspect the domain carefully."
+        );
+    }
+
+    // Compare the visible URL with the actual hostname.
+    const visibleText = displayedText.trim();
+    let visibleUrl = null;
+
+    try {
+        if (/^https?:\/\//i.test(visibleText)) {
+            visibleUrl = new URL(visibleText);
+        } else if (/^www\./i.test(visibleText)) {
+            visibleUrl = new URL(`https://${visibleText}`);
         }
+    } catch {
+        visibleUrl = null;
+    }
 
-        // Long opaque query parameters can be tracking tokens.
-        // This is supporting evidence only, not proof.
-        const queryLooksOpaque = [...url.searchParams.values()].some(
+    if (
+        visibleUrl &&
+        visibleUrl.hostname.toLowerCase() !== hostname
+    ) {
+        securityFindings.push(
+            "Displayed URL hostname differs from the actual destination hostname."
+        );
+    }
+
+    // Link-behavior indicators: not proof of malicious activity.
+    const trackingHostPatterns = [
+        /(^|[.-])click([.-]|$)/i,
+        /(^|[.-])track(ing)?([.-]|$)/i,
+        /(^|[.-])redirect([.-]|$)/i,
+        /(^|[.-])emailclick([.-]|$)/i,
+        /(^|[.-])linktrack([.-]|$)/i
+    ];
+
+    if (
+        trackingHostPatterns.some(pattern =>
+            pattern.test(hostname)
+        )
+    ) {
+        trackingSignals.push(
+            "Hostname resembles a click-tracking or redirect service."
+        );
+    }
+
+    const path = url.pathname.toLowerCase();
+
+    if (
+        /\/(emailclick|clicktrack|click|redirect|track|tracking)(\/|$)/i.test(path)
+    ) {
+        trackingSignals.push(
+            "URL path resembles a click-tracking or redirect endpoint."
+        );
+    }
+
+    const marketingHosts = [
+        "moengage.com",
+        "sendgrid.net",
+        "mailchimp.com",
+        "list-manage.com",
+        "mailgun.org"
+    ];
+
+    const isMarketingHost = marketingHosts.some(domain =>
+        hostname === domain || hostname.endsWith(`.${domain}`)
+    );
+
+    if (isMarketingHost) {
+        trackingSignals.push(
+            "Uses a domain commonly associated with email or marketing services."
+        );
+    }
+
+    const hasLongQueryValue =
+        [...url.searchParams.values()].some(
             value => value.length >= 100
         );
 
-        if (
-            queryLooksOpaque &&
-            trackingSignals.length > 0
-        ) {
-            trackingSignals.push(
-                "Contains a long query parameter that may carry a tracking token."
-            );
-        }
-
-        const possibleTracking = trackingSignals.length > 0;
-
-        findings.push(...trackingSignals);
-
-        // Use transparent labels rather than claiming a link is safe.
-        let level = "NO OBVIOUS FLAGS";
-
-        if (findings.length >= 3) {
-            level = "HIGHER CONCERN";
-        } else if (findings.length > 0) {
-            level = "REVIEW";
-        }
-
-        return {
-            level,
-            category: possibleTracking
-                ? "Possible tracking/redirect"
-                : "No obvious tracking indicators",
-            destinationStatus: possibleTracking
-                ? "Final destination unverified; redirect was not followed."
-                : "Initial destination identified; any subsequent redirect is unverified.",
-            findings
-        };
+    if (
+        hasLongQueryValue &&
+        trackingSignals.length > 0
+    ) {
+        trackingSignals.push(
+            "Contains a long query parameter that may be a tracking token."
+        );
     }
+
+    // Tracking indicators do NOT increase the security warning level.
+    let level = "NO OBVIOUS FLAGS";
+
+    if (securityFindings.length >= 2) {
+        level = "HIGHER CONCERN";
+    } else if (securityFindings.length === 1) {
+        level = "REVIEW";
+    }
+
+    return {
+        level,
+        category: trackingSignals.length > 0
+            ? "Possible tracking/redirect behavior"
+            : "No obvious tracking indicators",
+        destinationStatus:
+            "Final destination unverified; Mailshield did not follow redirects.",
+        findings: securityFindings,
+        trackingSignals
+    };
+}
+
 
     // ============================================================
     // 2. EXTRACT VISIBLE INFORMATION FROM THE OPEN GMAIL MESSAGE.
