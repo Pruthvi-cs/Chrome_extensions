@@ -255,6 +255,65 @@ function renderResults(fields) {
     for (const [name, values] of Object.entries(fields)) {
         if (!knownSet.has(name)) {
             addField(results, name, values.join("\n\n"));
+            
+            function extractAddress(value) {
+                if (!value) return "";
+
+                const angleAddress = value.match(/<([^<>]+)>/);
+
+                const candidate = angleAddress
+                    ? angleAddress[1]
+                    : value.trim();
+
+                const emailMatch = candidate.match(
+                    /^[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+$/
+                );
+
+                return emailMatch ? emailMatch[0].toLowerCase() : "";
+            }
+
+            const fromAddress = extractAddress(
+                fields["from"]?.[0]
+            );
+
+            const replyAddress = extractAddress(
+                fields["reply-to"]?.[0]
+            );
+
+            const returnPathAddress = extractAddress(
+                fields["return-path"]?.[0]
+            );
+
+            const identityFindings = [];
+
+            if (
+                fromAddress &&
+                replyAddress &&
+                fromAddress.split("@")[1] !== replyAddress.split("@")[1]
+            ) {
+                identityFindings.push(
+                    `Reply-To domain differs from From domain: ${fromAddress} vs ${replyAddress}. Review the reason for this difference.`
+                );
+            }
+
+            if (
+                fromAddress &&
+                returnPathAddress &&
+                fromAddress.split("@")[1] !== returnPathAddress.split("@")[1]
+            ) {
+                identityFindings.push(
+                    `Return-Path domain differs from From domain: ${fromAddress} vs ${returnPathAddress}. This can be legitimate; review the context.`
+                );
+            }
+
+            addField(
+                results,
+                "Sender identity review",
+                identityFindings.length
+                    ? identityFindings.join("\n\n")
+                    : "No domain mismatch detected among the available parsed addresses."
+            );
+
         }
     }
 
