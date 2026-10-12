@@ -5,188 +5,206 @@
     const BUTTON_CLASS = "mailshield-analyze-button";
     const PANEL_ID = "mailshield-report-panel";
 
-    console.log("MAILSHIELD_STEP_7 loaded");
+    console.log("MAILSHIELD — URL Analysis Update Loaded");
 
     // ============================================================
-    // 1. URL ANALYSIS — local rules only; never follows redirects.
+    // 1. URL ANALYSIS
+    // Local rules only. No redirects are followed.
     // ============================================================
 
-function checkUrlRisk(rawUrl, displayedText = "") {
-    const securityFindings = [];
-    const trackingSignals = [];
+    function checkUrlRisk(rawUrl, displayedText = "") {
+        const securityFindings = [];
+        const trackingSignals = [];
 
-    let url;
+        let url;
 
-    try {
-        url = new URL(rawUrl);
-    } catch {
-        return {
-            level: "REVIEW",
-            category: "Unrecognized URL",
-            destinationStatus: "Destination could not be parsed.",
-            findings: ["The link destination is not a valid URL."],
-            trackingSignals: []
-        };
-    }
-
-    if (!["http:", "https:"].includes(url.protocol)) {
-        return {
-            level: "REVIEW",
-            category: "Non-web link",
-            destinationStatus: "Not assessed by web URL checks.",
-            findings: [
-                `Uses the ${url.protocol} protocol, which this checker does not assess.`
-            ],
-            trackingSignals: []
-        };
-    }
-
-    const hostname = url.hostname.toLowerCase();
-
-    // Security indicators
-    if (url.protocol === "http:") {
-        securityFindings.push(
-            "Uses HTTP instead of HTTPS."
-        );
-    }
-
-    if (url.username || url.password) {
-        securityFindings.push(
-            "Contains URL credentials that could be misleading."
-        );
-    }
-
-    const isIPv4 =
-        /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname);
-
-    const isIPv6 =
-        hostname.startsWith("[") &&
-        hostname.endsWith("]");
-
-    if (isIPv4 || isIPv6) {
-        securityFindings.push(
-            "Uses an IP address instead of a conventional domain name."
-        );
-    }
-
-    if (
-        hostname.split(".").some(label =>
-            label.startsWith("xn--")
-        )
-    ) {
-        securityFindings.push(
-            "Contains a punycode domain label; inspect the domain carefully."
-        );
-    }
-
-    // Compare the visible URL with the actual hostname.
-    const visibleText = displayedText.trim();
-    let visibleUrl = null;
-
-    try {
-        if (/^https?:\/\//i.test(visibleText)) {
-            visibleUrl = new URL(visibleText);
-        } else if (/^www\./i.test(visibleText)) {
-            visibleUrl = new URL(`https://${visibleText}`);
+        try {
+            url = new URL(rawUrl);
+        } catch {
+            return {
+                level: "REVIEW",
+                category: "Unrecognized URL",
+                destinationStatus:
+                    "The destination could not be parsed.",
+                findings: [
+                    "The link destination is not a valid URL."
+                ],
+                trackingSignals: []
+            };
         }
-    } catch {
-        visibleUrl = null;
-    }
 
-    if (
-        visibleUrl &&
-        visibleUrl.hostname.toLowerCase() !== hostname
-    ) {
-        securityFindings.push(
-            "Displayed URL hostname differs from the actual destination hostname."
+        // Only HTTP and HTTPS are assessed by these URL rules.
+        if (!["http:", "https:"].includes(url.protocol)) {
+            return {
+                level: "REVIEW",
+                category: "Non-web link",
+                destinationStatus:
+                    "This protocol is not assessed by the web URL checker.",
+                findings: [
+                    `Uses the ${url.protocol} protocol, which this checker does not assess.`
+                ],
+                trackingSignals: []
+            };
+        }
+
+        const hostname = url.hostname.toLowerCase();
+
+        // ---------------- SECURITY INDICATORS ----------------
+
+        if (url.protocol === "http:") {
+            securityFindings.push(
+                "Uses HTTP instead of HTTPS. The connection is not protected by HTTPS."
+            );
+        }
+
+        if (url.username || url.password) {
+            securityFindings.push(
+                "Contains URL credentials before the hostname, which could be misleading."
+            );
+        }
+
+        const isIPv4 =
+            /^(\d{1,3}\.){3}\d{1,3}$/.test(hostname);
+
+        const isIPv6 =
+            hostname.startsWith("[") &&
+            hostname.endsWith("]");
+
+        if (isIPv4 || isIPv6) {
+            securityFindings.push(
+                "Uses an IP address instead of a conventional domain name."
+            );
+        }
+
+        if (
+            hostname.split(".").some(label =>
+                label.startsWith("xn--")
+            )
+        ) {
+            securityFindings.push(
+                "Contains a punycode domain label. Inspect the domain carefully for possible lookalike characters."
+            );
+        }
+
+        // Compare the visible link text with the actual hostname
+        // when the visible text itself is a URL.
+        const visibleText = displayedText.trim();
+        let visibleUrl = null;
+
+        try {
+            if (/^https?:\/\//i.test(visibleText)) {
+                visibleUrl = new URL(visibleText);
+            } else if (/^www\./i.test(visibleText)) {
+                visibleUrl = new URL(`https://${visibleText}`);
+            }
+        } catch {
+            visibleUrl = null;
+        }
+
+        if (
+            visibleUrl &&
+            visibleUrl.hostname.toLowerCase() !== hostname
+        ) {
+            securityFindings.push(
+                "The hostname shown in the email differs from the actual link destination."
+            );
+        }
+
+        // ---------------- LINK BEHAVIOR INDICATORS ----------------
+        // These observations are NOT proof of malicious activity.
+
+        const trackingHostPatterns = [
+            /(^|[.-])click([.-]|$)/i,
+            /(^|[.-])track(ing)?([.-]|$)/i,
+            /(^|[.-])redirect([.-]|$)/i,
+            /(^|[.-])emailclick([.-]|$)/i,
+            /(^|[.-])linktrack([.-]|$)/i
+        ];
+
+        if (
+            trackingHostPatterns.some(pattern =>
+                pattern.test(hostname)
+            )
+        ) {
+            trackingSignals.push(
+                "Hostname resembles a click-tracking or redirect service."
+            );
+        }
+
+        const path = url.pathname.toLowerCase();
+
+        if (
+            /\/(emailclick|clicktrack|click|redirect|track|tracking)(\/|$)/i.test(path)
+        ) {
+            trackingSignals.push(
+                "URL path resembles a click-tracking or redirect endpoint."
+            );
+        }
+
+        // These domains are commonly associated with email
+        // or marketing services. This alone is not suspicious.
+        const marketingHosts = [
+            "moengage.com",
+            "sendgrid.net",
+            "mailchimp.com",
+            "list-manage.com",
+            "mailgun.org"
+        ];
+
+        const isMarketingHost = marketingHosts.some(domain =>
+            hostname === domain ||
+            hostname.endsWith(`.${domain}`)
         );
+
+        if (isMarketingHost) {
+            trackingSignals.push(
+                "Uses a domain commonly associated with email or marketing services."
+            );
+        }
+
+        const hasLongQueryValue =
+            [...url.searchParams.values()].some(
+                value => value.length >= 100
+            );
+
+        if (
+            hasLongQueryValue &&
+            trackingSignals.length > 0
+        ) {
+            trackingSignals.push(
+                "Contains a long query parameter that may be a tracking token."
+            );
+        }
+
+        // ---------------- PRELIMINARY WARNING LEVEL ----------------
+        // Tracking indicators do not affect this score.
+        // This is a rule-based indicator level, not a verdict.
+
+        let level = "NO OBVIOUS FLAGS";
+
+        if (securityFindings.length >= 2) {
+            level = "HIGHER CONCERN";
+        } else if (securityFindings.length === 1) {
+            level = "REVIEW";
+        }
+
+        return {
+            level,
+
+            category: trackingSignals.length > 0
+                ? "Possible tracking/redirect behavior"
+                : "No obvious tracking indicators",
+
+            destinationStatus:
+                "Final destination unverified. Mailshield did not follow redirects.",
+
+            findings: securityFindings,
+            trackingSignals
+        };
     }
-
-    // Link-behavior indicators: not proof of malicious activity.
-    const trackingHostPatterns = [
-        /(^|[.-])click([.-]|$)/i,
-        /(^|[.-])track(ing)?([.-]|$)/i,
-        /(^|[.-])redirect([.-]|$)/i,
-        /(^|[.-])emailclick([.-]|$)/i,
-        /(^|[.-])linktrack([.-]|$)/i
-    ];
-
-    if (
-        trackingHostPatterns.some(pattern =>
-            pattern.test(hostname)
-        )
-    ) {
-        trackingSignals.push(
-            "Hostname resembles a click-tracking or redirect service."
-        );
-    }
-
-    const path = url.pathname.toLowerCase();
-
-    if (
-        /\/(emailclick|clicktrack|click|redirect|track|tracking)(\/|$)/i.test(path)
-    ) {
-        trackingSignals.push(
-            "URL path resembles a click-tracking or redirect endpoint."
-        );
-    }
-
-    const marketingHosts = [
-        "moengage.com",
-        "sendgrid.net",
-        "mailchimp.com",
-        "list-manage.com",
-        "mailgun.org"
-    ];
-
-    const isMarketingHost = marketingHosts.some(domain =>
-        hostname === domain || hostname.endsWith(`.${domain}`)
-    );
-
-    if (isMarketingHost) {
-        trackingSignals.push(
-            "Uses a domain commonly associated with email or marketing services."
-        );
-    }
-
-    const hasLongQueryValue =
-        [...url.searchParams.values()].some(
-            value => value.length >= 100
-        );
-
-    if (
-        hasLongQueryValue &&
-        trackingSignals.length > 0
-    ) {
-        trackingSignals.push(
-            "Contains a long query parameter that may be a tracking token."
-        );
-    }
-
-    // Tracking indicators do NOT increase the security warning level.
-    let level = "NO OBVIOUS FLAGS";
-
-    if (securityFindings.length >= 2) {
-        level = "HIGHER CONCERN";
-    } else if (securityFindings.length === 1) {
-        level = "REVIEW";
-    }
-
-    return {
-        level,
-        category: trackingSignals.length > 0
-            ? "Possible tracking/redirect behavior"
-            : "No obvious tracking indicators",
-        destinationStatus:
-            "Final destination unverified; Mailshield did not follow redirects.",
-        findings: securityFindings,
-        trackingSignals
-    };
-}
-
 
     // ============================================================
-    // 2. EXTRACT VISIBLE INFORMATION FROM THE OPEN GMAIL MESSAGE.
+    // 2. EXTRACT INFORMATION FROM THE OPEN GMAIL MESSAGE
     // ============================================================
 
     function extractEmail(bodyElement) {
@@ -235,8 +253,8 @@ function checkUrlRisk(rawUrl, displayedText = "") {
     }
 
     // ============================================================
-    // 3. DISPLAY THE REPORT.
-    // Email data is rendered with textContent, not as HTML.
+    // 3. BUILD THE MAILSHIELD REPORT
+    // Email content is inserted using textContent, not HTML.
     // ============================================================
 
     function showReport(email) {
@@ -249,7 +267,7 @@ function checkUrlRisk(rawUrl, displayedText = "") {
             position: "fixed",
             top: "80px",
             right: "24px",
-            width: "min(440px, calc(100vw - 40px))",
+            width: "min(460px, calc(100vw - 40px))",
             height: "min(760px, calc(100vh - 110px))",
             zIndex: "2147483647"
         });
@@ -301,7 +319,7 @@ function checkUrlRisk(rawUrl, displayedText = "") {
 
                 main {
                     padding: 14px;
-                    overflow: auto;
+                    overflow-y: auto;
                 }
 
                 .field {
@@ -311,7 +329,7 @@ function checkUrlRisk(rawUrl, displayedText = "") {
                 .label {
                     color: #93c5fd;
                     font-weight: bold;
-                    margin-bottom: 3px;
+                    margin-bottom: 4px;
                 }
 
                 .value {
@@ -333,8 +351,8 @@ function checkUrlRisk(rawUrl, displayedText = "") {
                 }
 
                 .link-card {
-                    margin: 10px 0;
-                    padding: 10px;
+                    margin: 12px 0;
+                    padding: 12px;
                     border: 1px solid #334155;
                     border-radius: 8px;
                     background: #111c30;
@@ -342,40 +360,62 @@ function checkUrlRisk(rawUrl, displayedText = "") {
 
                 .link-text {
                     font-weight: 600;
-                    margin-bottom: 5px;
+                    margin-bottom: 8px;
                     overflow-wrap: anywhere;
                 }
 
+                .url-label {
+                    color: #93c5fd;
+                    font-size: 12px;
+                    font-weight: bold;
+                    margin-bottom: 4px;
+                }
+
                 .url {
+                    display: block;
                     overflow-wrap: anywhere;
+                    word-break: break-word;
+                    white-space: pre-wrap;
                     color: #7dd3fc;
-                    margin-bottom: 8px;
+                    background: #0b1220;
+                    border: 1px solid #334155;
+                    border-radius: 6px;
+                    padding: 8px;
+                    margin-bottom: 10px;
+                    user-select: text;
                 }
 
                 .category {
                     font-weight: bold;
-                    margin-bottom: 4px;
+                    margin-bottom: 6px;
                 }
 
                 .status {
                     color: #cbd5e1;
                     font-size: 12px;
-                    margin-bottom: 6px;
+                    margin-bottom: 12px;
+                }
+
+                .section {
+                    margin-top: 12px;
+                    padding-top: 10px;
+                    border-top: 1px solid #334155;
                 }
 
                 .findings {
                     padding-left: 18px;
-                    margin: 6px 0;
+                    margin: 6px 0 0;
                 }
 
                 .findings li {
-                    margin-bottom: 5px;
+                    margin-bottom: 6px;
+                    overflow-wrap: anywhere;
                 }
 
                 .safe-note {
                     color: #94a3b8;
                     font-size: 12px;
-                    margin-top: 10px;
+                    margin-top: 12px;
                 }
             </style>
 
@@ -387,8 +427,8 @@ function checkUrlRisk(rawUrl, displayedText = "") {
 
                 <main>
                     <p class="notice">
-                        Local inspection only. This is a preliminary
-                        indicator report, not a security verdict.
+                        Preliminary local analysis only.
+                        No security verdict is guaranteed.
                     </p>
 
                     <div class="field">
@@ -414,10 +454,11 @@ function checkUrlRisk(rawUrl, displayedText = "") {
                     <div class="field">
                         <div class="label" id="linkCount">Links</div>
                         <div id="links"></div>
+
                         <p class="safe-note">
-                            Mailshield does not follow links or verify
-                            their final destinations in this version.
-                            No warning does not mean a link is safe.
+                            Mailshield does not open links or follow redirects.
+                            The displayed URL is the initial destination only.
+                            A link without obvious flags is not necessarily safe.
                         </p>
                     </div>
                 </main>
@@ -443,54 +484,64 @@ function checkUrlRisk(rawUrl, displayedText = "") {
 
         if (email.links.length === 0) {
             const empty = document.createElement("p");
-            empty.textContent = "No links found in the message body.";
+            empty.textContent =
+                "No links found in the message body.";
+
             linksContainer.appendChild(empty);
         }
 
-        email.links.forEach(link => {
+        email.links.forEach((link, index) => {
             const result = checkUrlRisk(link.url, link.text);
 
             const card = document.createElement("section");
             card.className = "link-card";
 
+            // Displayed link text
             const text = document.createElement("div");
             text.className = "link-text";
-            text.textContent = link.text;
+            text.textContent =
+                `${index + 1}. ${link.text}`;
+
+            // Actual URL — explicitly included in the card.
+            const urlLabel = document.createElement("div");
+            urlLabel.className = "url-label";
+            urlLabel.textContent = "Actual link URL";
 
             const url = document.createElement("div");
             url.className = "url";
             url.textContent = link.url;
 
+            // Preliminary security indicator level
             const category = document.createElement("div");
             category.className = "category";
             category.textContent =
-                `${result.level} · ${result.category}`;
+                `Security assessment: ${result.level}`;
 
             category.style.color =
                 result.level === "HIGHER CONCERN" ? "#f87171" :
                 result.level === "REVIEW" ? "#fbbf24" :
                 "#86efac";
 
+            // Destination limitations
             const status = document.createElement("div");
             status.className = "status";
             status.textContent = result.destinationStatus;
 
-           
-            const findings = document.createElement("ul");
-            findings.className = "findings";
-
+            // Create a separate report section.
             function addSection(title, items, emptyMessage) {
                 const section = document.createElement("div");
+                section.className = "section";
 
                 const heading = document.createElement("div");
                 heading.className = "label";
                 heading.textContent = title;
-                section.appendChild(heading);
 
                 const list = document.createElement("ul");
                 list.className = "findings";
 
-                const entries = items.length ? items : [emptyMessage];
+                const entries = items.length > 0
+                    ? items
+                    : [emptyMessage];
 
                 entries.forEach(message => {
                     const item = document.createElement("li");
@@ -498,9 +549,18 @@ function checkUrlRisk(rawUrl, displayedText = "") {
                     list.appendChild(item);
                 });
 
-                section.appendChild(list);
+                section.append(heading, list);
                 return section;
             }
+
+            // IMPORTANT: The URL is appended to the card here.
+            card.append(
+                text,
+                urlLabel,
+                url,
+                category,
+                status
+            );
 
             card.appendChild(
                 addSection(
@@ -518,19 +578,6 @@ function checkUrlRisk(rawUrl, displayedText = "") {
                 )
             );
 
-            if (result.findings.length === 0) {
-                const item = document.createElement("li");
-                item.textContent =
-                    "No obvious warning indicators detected by current rules.";
-                findings.appendChild(item);
-            } else {
-                result.findings.forEach(finding => {
-                    const item = document.createElement("li");
-                    item.textContent = finding;
-                    findings.appendChild(item);
-                });
-            }
-
             linksContainer.appendChild(card);
         });
 
@@ -541,13 +588,12 @@ function checkUrlRisk(rawUrl, displayedText = "") {
         document.body.appendChild(host);
 
         console.log("Mailshield: local report generated.", {
-            subject: email.subject,
             linkCount: email.links.length
         });
     }
 
     // ============================================================
-    // 4. ADD THE ANALYZE BUTTON TO VISIBLE EMAIL BODIES.
+    // 4. ADD ANALYZE BUTTONS TO VISIBLE GMAIL MESSAGE BODIES
     // ============================================================
 
     function addButtons() {
@@ -572,7 +618,8 @@ function checkUrlRisk(rawUrl, displayedText = "") {
 
             button.className = BUTTON_CLASS;
             button.type = "button";
-            button.textContent = "🛡 Analyze with Mailshield";
+            button.textContent =
+                "🛡 Analyze with Mailshield";
 
             Object.assign(button.style, {
                 display: "block",
@@ -597,7 +644,8 @@ function checkUrlRisk(rawUrl, displayedText = "") {
                         error
                     );
 
-                    button.textContent = "Analysis failed — try again";
+                    button.textContent =
+                        "Analysis failed — try again";
                 }
             });
 
@@ -605,7 +653,7 @@ function checkUrlRisk(rawUrl, displayedText = "") {
         });
     }
 
-    // Gmail updates its interface dynamically.
+    // Gmail dynamically updates its interface.
     const observer = new MutationObserver(addButtons);
 
     if (document.body) {
