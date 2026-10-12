@@ -2,17 +2,313 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Mailshield URL Test 1</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mailshield — Header Analyzer Test</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 28px;
+            background: #0f172a;
+            color: #e2e8f0;
+            font: 14px/1.6 Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        h1 {
+            color: #93c5fd;
+        }
+
+        .notice {
+            padding: 12px;
+            background: #172554;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: #cbd5e1;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 14px;
+            margin-top: 12px;
+            border: 1px solid #475569;
+            border-radius: 8px;
+            background: #020617;
+            color: #e2e8f0;
+            font: 13px/1.5 Consolas, monospace;
+            resize: vertical;
+        }
+
+        button {
+            margin: 12px 0;
+            padding: 11px 18px;
+            border: 0;
+            border-radius: 7px;
+            background: #2563eb;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .result {
+            margin-top: 18px;
+            padding: 16px;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            background: #111c30;
+        }
+
+        .field {
+            padding: 10px 0;
+            border-bottom: 1px solid #334155;
+            overflow-wrap: anywhere;
+        }
+
+        .field:last-child {
+            border-bottom: 0;
+        }
+
+        .label {
+            color: #93c5fd;
+            font-weight: bold;
+        }
+
+        .value {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .warning {
+            color: #fbbf24;
+        }
+
+        .error {
+            color: #f87171;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
+
 <body>
-  <h2>Mailshield — URL Test 1</h2>
+<div class="container">
+    <h1>🛡 Mailshield</h1>
+    <h2>Email Header Analyzer — Test 1</h2>
 
-  <p>This is a test link. Do not click it.</p>
+    <p class="notice">
+        This page parses pasted header text locally.
+        It does not contact mail servers or verify authentication.
+        The authentication results shown are claims found in the
+        supplied text, not independently verified results.
+    </p>
 
-  <a href="http://example.com/login">
-    https://accounts.google.com
-  </a>
+    <label for="rawHeaders">
+        <strong>Raw email headers</strong>
+    </label>
 
+    <textarea id="rawHeaders" spellcheck="false">From: Security Team <security@example.org>
+Reply-To: support@example.net
+Return-Path: <bounce@example.org>
+To: recipient@example.com
+Subject: Mailshield Sample Test
+Date: Mon, 12 Oct 2026 10:30:00 +0000
+Message-ID: <sample123@example.org>
+Received: from mail.example.org (mail.example.org [192.0.2.10])
+    by mx.example.com with ESMTPS id sample123
+Authentication-Results: mx.example.com;
+    spf=pass smtp.mailfrom=example.org;
+    dkim=pass header.d=example.org;
+    dmarc=pass header.from=example.org</textarea>
+
+    <button id="analyzeButton" type="button">
+        Analyze Headers
+    </button>
+
+    <button id="clearButton" type="button">
+        Clear Results
+    </button>
+
+    <div id="error" class="error hidden" role="alert"></div>
+    <section id="results" class="result hidden" aria-live="polite"></section>
+</div>
+
+<script>
+"use strict";
+
+const KNOWN_FIELDS = [
+    "from",
+    "reply-to",
+    "return-path",
+    "to",
+    "subject",
+    "date",
+    "message-id",
+    "received",
+    "authentication-results"
+];
+
+function parseRawHeaders(rawText) {
+    const normalized = rawText.replace(/\r\n/g, "\n");
+    const lines = normalized.split("\n");
+    const unfolded = [];
+
+    // Join folded header lines with their preceding header.
+    for (const line of lines) {
+        if (/^[ \t]/.test(line) && unfolded.length > 0) {
+            unfolded[unfolded.length - 1] +=
+                " " + line.trim();
+        } else {
+            unfolded.push(line);
+        }
+    }
+
+    const fields = {};
+
+    for (const line of unfolded) {
+        if (!line.trim()) {
+            continue;
+        }
+
+        const separator = line.indexOf(":");
+
+        if (separator <= 0) {
+            continue;
+        }
+
+        const name = line.slice(0, separator).trim();
+        const value = line.slice(separator + 1).trim();
+
+        // Header names must use printable ASCII characters
+        // other than colon and whitespace.
+        if (!/^[!-9;-~]+$/.test(name)) {
+            continue;
+        }
+
+        const key = name.toLowerCase();
+
+        if (!fields[key]) {
+            fields[key] = [];
+        }
+
+        // Preserve repeated fields such as Received.
+        fields[key].push(value);
+    }
+
+    return fields;
+}
+
+function addField(container, label, value) {
+    const wrapper = document.createElement("div");
+    wrapper.className = "field";
+
+    const heading = document.createElement("div");
+    heading.className = "label";
+    heading.textContent = label;
+
+    const content = document.createElement("div");
+    content.className = "value";
+    content.textContent = value || "Not present";
+
+    wrapper.append(heading, content);
+    container.appendChild(wrapper);
+}
+
+function renderResults(fields) {
+    const results = document.getElementById("results");
+    results.replaceChildren();
+
+    const count = Object.values(fields)
+        .reduce((total, values) => total + values.length, 0);
+
+    addField(results, "Header fields found", String(count));
+
+    for (const name of KNOWN_FIELDS) {
+        const values = fields[name];
+
+        if (values && values.length > 0) {
+            addField(
+                results,
+                name,
+                values.join("\n\n")
+            );
+        }
+    }
+
+    const knownSet = new Set(KNOWN_FIELDS);
+
+    for (const [name, values] of Object.entries(fields)) {
+        if (!knownSet.has(name)) {
+            addField(results, name, values.join("\n\n"));
+        }
+    }
+
+    const note = document.createElement("p");
+    note.className = "warning";
+    note.textContent =
+        "Important: parsed header values are not proof of sender identity. " +
+        "Authentication-Results text may be forged in pasted data. " +
+        "Verification requires trustworthy evidence from the receiving mail system.";
+
+    results.appendChild(note);
+    results.classList.remove("hidden");
+}
+
+document.getElementById("analyzeButton").addEventListener(
+    "click",
+    () => {
+        const rawText =
+            document.getElementById("rawHeaders").value;
+
+        const error = document.getElementById("error");
+        const results = document.getElementById("results");
+
+        error.textContent = "";
+        error.classList.add("hidden");
+        results.classList.add("hidden");
+
+        if (!rawText.trim()) {
+            error.textContent = "Paste some email headers first.";
+            error.classList.remove("hidden");
+            return;
+        }
+
+        try {
+            const fields = parseRawHeaders(rawText);
+            renderResults(fields);
+        } catch (exception) {
+            error.textContent =
+                "Could not parse the input. Check the text and try again.";
+            error.classList.remove("hidden");
+            console.error("Mailshield parser error:", exception);
+        }
+    }
+);
+
+document.getElementById("clearButton").addEventListener(
+    "click",
+    () => {
+        document.getElementById("results").replaceChildren();
+        document.getElementById("results").classList.add("hidden");
+        document.getElementById("error").textContent = "";
+        document.getElementById("error").classList.add("hidden");
+    }
+);
+</script>
 </body>
 </html>
