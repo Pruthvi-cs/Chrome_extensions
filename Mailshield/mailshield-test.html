@@ -2,372 +2,624 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mailshield — Header Analyzer Test</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mailshield — Header Analyzer</title>
 
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-        body {
-            margin: 0;
-            padding: 28px;
-            background: #0f172a;
-            color: #e2e8f0;
-            font: 14px/1.6 Arial, sans-serif;
-        }
+    body {
+      margin: 0;
+      padding: 30px 16px;
+      min-height: 100vh;
+      background: #0b1120;
+      color: #e5e7eb;
+      font-family: Arial, sans-serif;
+    }
 
-        .container {
-            max-width: 900px;
-            margin: auto;
-        }
+    .container {
+      width: 100%;
+      max-width: 900px;
+      margin: auto;
+    }
 
-        h1 {
-            color: #93c5fd;
-        }
+    header {
+      margin-bottom: 28px;
+    }
 
-        .notice {
-            padding: 12px;
-            background: #172554;
-            border: 1px solid #334155;
-            border-radius: 8px;
-            color: #cbd5e1;
-        }
+    .brand {
+      color: #60a5fa;
+      font-size: 14px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
 
-        textarea {
-            width: 100%;
-            min-height: 300px;
-            padding: 14px;
-            margin-top: 12px;
-            border: 1px solid #475569;
-            border-radius: 8px;
-            background: #020617;
-            color: #e2e8f0;
-            font: 13px/1.5 Consolas, monospace;
-            resize: vertical;
-        }
+    h1 {
+      margin: 10px 0;
+      font-size: 32px;
+    }
 
-        button {
-            margin: 12px 0;
-            padding: 11px 18px;
-            border: 0;
-            border-radius: 7px;
-            background: #2563eb;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
+    .subtitle {
+      color: #9ca3af;
+      line-height: 1.6;
+    }
 
-        button:hover {
-            background: #1d4ed8;
-        }
+    .panel {
+      padding: 22px;
+      margin-bottom: 20px;
+      background: #111827;
+      border: 1px solid #263244;
+      border-radius: 14px;
+    }
 
-        .result {
-            margin-top: 18px;
-            padding: 16px;
-            border: 1px solid #334155;
-            border-radius: 8px;
-            background: #111c30;
-        }
+    label {
+      display: block;
+      margin-bottom: 12px;
+      font-weight: bold;
+    }
 
-        .field {
-            padding: 10px 0;
-            border-bottom: 1px solid #334155;
-            overflow-wrap: anywhere;
-        }
+    textarea {
+      width: 100%;
+      min-height: 250px;
+      padding: 14px;
+      resize: vertical;
+      border: 1px solid #374151;
+      border-radius: 9px;
+      outline: none;
+      background: #080d18;
+      color: #d1fae5;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
 
-        .field:last-child {
-            border-bottom: 0;
-        }
+    textarea:focus {
+      border-color: #60a5fa;
+    }
 
-        .label {
-            color: #93c5fd;
-            font-weight: bold;
-        }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
 
-        .value {
-            white-space: pre-wrap;
-            overflow-wrap: anywhere;
-        }
+    button {
+      padding: 11px 17px;
+      border: 0;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
 
-        .warning {
-            color: #fbbf24;
-        }
+    .primary {
+      background: #2563eb;
+      color: white;
+    }
 
-        .error {
-            color: #f87171;
-        }
+    .secondary {
+      background: #273449;
+      color: #e5e7eb;
+    }
 
-        .hidden {
-            display: none;
-        }
-    </style>
+    button:hover {
+      opacity: 0.88;
+    }
+
+    #status {
+      margin-top: 12px;
+      color: #9ca3af;
+      font-size: 13px;
+    }
+
+    #results {
+      display: none;
+    }
+
+    .summary {
+      margin-bottom: 18px;
+      padding: 14px;
+      background: #0b1220;
+      border: 1px solid #263244;
+      border-radius: 9px;
+    }
+
+    .field {
+      margin-top: 12px;
+      padding: 15px;
+      background: #0b1220;
+      border: 1px solid #263244;
+      border-radius: 9px;
+    }
+
+    .field-name {
+      margin-bottom: 9px;
+      color: #93c5fd;
+      font-size: 12px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .field-value {
+      overflow-wrap: anywhere;
+      white-space: pre-wrap;
+      color: #e5e7eb;
+      font-family: Consolas, monospace;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .finding {
+      padding: 12px;
+      margin-top: 8px;
+      border-radius: 7px;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    .finding.warning {
+      background: #422006;
+      border: 1px solid #92400e;
+      color: #fde68a;
+    }
+
+    .finding.info {
+      background: #102b25;
+      border: 1px solid #166534;
+      color: #bbf7d0;
+    }
+
+    .notice {
+      padding: 15px;
+      background: #291b12;
+      border: 1px solid #854d0e;
+      border-radius: 9px;
+      color: #fed7aa;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .empty {
+      color: #9ca3af;
+      line-height: 1.6;
+    }
+
+    footer {
+      padding: 8px 0;
+      color: #6b7280;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+  </style>
 </head>
 
 <body>
-<div class="container">
-    <h1>🛡 Mailshield</h1>
-    <h2>Email Header Analyzer — Test 1</h2>
+  <main class="container">
+    <header>
+      <div class="brand">Mailshield / Digital Forensics</div>
+      <h1>Email Header Analyzer</h1>
+      <p class="subtitle">
+        Parse raw email headers, inspect repeated fields, and identify
+        sender-address domain differences for further investigation.
+      </p>
+    </header>
 
-    <p class="notice">
-        This page parses pasted header text locally.
-        It does not contact mail servers or verify authentication.
-        The authentication results shown are claims found in the
-        supplied text, not independently verified results.
-    </p>
+    <section class="panel">
+      <label for="rawHeaders">Raw email headers</label>
 
-    <label for="rawHeaders">
-        <strong>Raw email headers</strong>
-    </label>
+      <textarea
+        id="rawHeaders"
+        spellcheck="false"
+        placeholder="Paste the raw email headers here..."
+      ></textarea>
 
-    <textarea id="rawHeaders" spellcheck="false">From: Security Team <security@example.org>
+      <div class="actions">
+        <button class="primary" id="analyzeBtn" type="button">
+          Analyze Headers
+        </button>
+
+        <button class="secondary" id="sampleBtn" type="button">
+          Load Test Sample
+        </button>
+
+        <button class="secondary" id="clearBtn" type="button">
+          Clear
+        </button>
+      </div>
+
+      <div id="status" role="status" aria-live="polite">
+        Ready. Paste headers or load the sample.
+      </div>
+    </section>
+
+    <section class="panel" id="results">
+      <h2>Analysis Results</h2>
+
+      <div class="summary" id="summary"></div>
+
+      <h3>Sender Identity Review</h3>
+      <div id="identityReview"></div>
+
+      <h3>Parsed Header Fields</h3>
+      <div id="fields"></div>
+    </section>
+
+    <section class="notice">
+      <strong>Important security limitation</strong><br>
+      This tool parses pasted text only. Header values, including
+      Authentication-Results, can be forged in untrusted data.
+      A From/Reply-To/Return-Path domain difference is not proof of
+      phishing. This tool does not verify SPF, DKIM, DMARC, message
+      signatures, or the authenticity of the receiving mail server.
+    </section>
+
+    <footer>
+      Mailshield local testing tool · No network requests are made by this page.
+    </footer>
+  </main>
+
+  <script>
+    "use strict";
+
+    const rawHeadersInput = document.getElementById("rawHeaders");
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    const sampleBtn = document.getElementById("sampleBtn");
+    const clearBtn = document.getElementById("clearBtn");
+    const status = document.getElementById("status");
+    const results = document.getElementById("results");
+    const summary = document.getElementById("summary");
+    const identityReview = document.getElementById("identityReview");
+    const fieldsContainer = document.getElementById("fields");
+
+    const sampleHeaders = `From: alerts@example.org
 Reply-To: support@example.net
 Return-Path: <bounce@example.org>
-To: recipient@example.com
-Subject: Mailshield Sample Test
-Date: Mon, 12 Oct 2026 10:30:00 +0000
-Message-ID: <sample123@example.org>
-Received: from mail.example.org (mail.example.org [192.0.2.10])
-    by mx.example.com with ESMTPS id sample123
-Authentication-Results: mx.example.com;
+To: analyst@example.com
+Subject: Mailshield Identity Test
+Received: from relay-a.example.org by relay-b.example.org
+Authentication-Results: mx.example.org;
     spf=pass smtp.mailfrom=example.org;
     dkim=pass header.d=example.org;
-    dmarc=pass header.from=example.org</textarea>
+    dmarc=pass header.from=example.org`;
 
-    <button id="analyzeButton" type="button">
-        Analyze Headers
-    </button>
+    /*
+     * Parse raw headers:
+     * - Normalize line endings.
+     * - Unfold continuation lines.
+     * - Preserve repeated header fields.
+     */
+    function parseRawHeaders(rawText) {
+      const fields = Object.create(null);
 
-    <button id="clearButton" type="button">
-        Clear Results
-    </button>
+      const normalized = rawText
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n");
 
-    <div id="error" class="error hidden" role="alert"></div>
-    <section id="results" class="result hidden" aria-live="polite"></section>
-</div>
+      const unfoldedLines = [];
+      const lines = normalized.split("\n");
 
-<script>
-"use strict";
-
-const KNOWN_FIELDS = [
-    "from",
-    "reply-to",
-    "return-path",
-    "to",
-    "subject",
-    "date",
-    "message-id",
-    "received",
-    "authentication-results"
-];
-
-function parseRawHeaders(rawText) {
-    const normalized = rawText.replace(/\r\n/g, "\n");
-    const lines = normalized.split("\n");
-    const unfolded = [];
-
-    // Join folded header lines with their preceding header.
-    for (const line of lines) {
-        if (/^[ \t]/.test(line) && unfolded.length > 0) {
-            unfolded[unfolded.length - 1] +=
-                " " + line.trim();
+      for (const line of lines) {
+        if (/^[ \t]/.test(line) && unfoldedLines.length > 0) {
+          unfoldedLines[unfoldedLines.length - 1] +=
+            " " + line.trim();
         } else {
-            unfolded.push(line);
+          unfoldedLines.push(line);
         }
-    }
+      }
 
-    const fields = {};
-
-    for (const line of unfolded) {
+      for (const line of unfoldedLines) {
         if (!line.trim()) {
-            continue;
+          continue;
         }
 
         const separator = line.indexOf(":");
 
         if (separator <= 0) {
-            continue;
+          continue;
         }
 
         const name = line.slice(0, separator).trim();
         const value = line.slice(separator + 1).trim();
 
-        // Header names must use printable ASCII characters
-        // other than colon and whitespace.
+        // Header field names use printable ASCII characters,
+        // excluding the colon and whitespace.
         if (!/^[!-9;-~]+$/.test(name)) {
-            continue;
+          continue;
         }
 
         const key = name.toLowerCase();
 
         if (!fields[key]) {
-            fields[key] = [];
+          fields[key] = [];
         }
 
-        // Preserve repeated fields such as Received.
         fields[key].push(value);
+      }
+
+      return fields;
     }
 
-    return fields;
-}
+    /*
+     * Extract a basic email address from a header value.
+     * This is a lightweight parser, not a complete RFC email parser.
+     */
+    function extractAddress(value) {
+      if (!value) {
+        return "";
+      }
 
-function addField(container, label, value) {
-    const wrapper = document.createElement("div");
-    wrapper.className = "field";
+      const input = value.trim();
+      const angleAddress = input.match(/<([^<>]+)>/);
 
-    const heading = document.createElement("div");
-    heading.className = "label";
-    heading.textContent = label;
+      const candidate = angleAddress
+        ? angleAddress[1].trim()
+        : input;
 
-    const content = document.createElement("div");
-    content.className = "value";
-    content.textContent = value || "Not present";
+      const match = candidate.match(
+        /^[^@\s<>]+@[^@\s<>]+$/
+      );
 
-    wrapper.append(heading, content);
-    container.appendChild(wrapper);
-}
+      if (!match) {
+        return "";
+      }
 
-function renderResults(fields) {
-    const results = document.getElementById("results");
-    results.replaceChildren();
+      const parts = candidate.split("@");
 
-    const count = Object.values(fields)
-        .reduce((total, values) => total + values.length, 0);
+      if (parts.length !== 2 || !parts[1]) {
+        return "";
+      }
 
-    addField(results, "Header fields found", String(count));
+      return candidate.toLowerCase();
+    }
 
-    for (const name of KNOWN_FIELDS) {
+    function getDomain(address) {
+      const atIndex = address.lastIndexOf("@");
+
+      if (atIndex < 0) {
+        return "";
+      }
+
+      return address.slice(atIndex + 1).toLowerCase();
+    }
+
+    /*
+     * Add a result card using textContent to avoid treating
+     * pasted header values as HTML.
+     */
+    function addField(container, name, value) {
+      const card = document.createElement("div");
+      card.className = "field";
+
+      const title = document.createElement("div");
+      title.className = "field-name";
+      title.textContent = name;
+
+      const content = document.createElement("div");
+      content.className = "field-value";
+      content.textContent = value;
+
+      card.append(title, content);
+      container.appendChild(card);
+    }
+
+    function addFinding(container, message, type = "warning") {
+      const item = document.createElement("div");
+      item.className = `finding ${type}`;
+      item.textContent = message;
+      container.appendChild(item);
+    }
+
+    /*
+     * Compare From, Reply-To and Return-Path domains.
+     * Differences are review signals, not verdicts.
+     */
+    function renderIdentityReview(fields) {
+      identityReview.replaceChildren();
+
+      const fromAddress = extractAddress(fields["from"]?.[0]);
+      const replyAddress = extractAddress(fields["reply-to"]?.[0]);
+      const returnPathAddress = extractAddress(
+        fields["return-path"]?.[0]
+      );
+
+      const findings = [];
+
+      if (!fromAddress) {
+        findings.push(
+          "A usable From email address could not be extracted. " +
+          "No From-domain comparison was performed."
+        );
+      }
+
+      if (
+        fromAddress &&
+        replyAddress &&
+        getDomain(fromAddress) !== getDomain(replyAddress)
+      ) {
+        findings.push(
+          `Reply-To domain differs from From domain: ` +
+          `${fromAddress} vs ${replyAddress}. Review the reason ` +
+          `for this difference; it can be legitimate.`
+        );
+      }
+
+      if (
+        fromAddress &&
+        fields["reply-to"]?.[0] &&
+        !replyAddress
+      ) {
+        findings.push(
+          "Reply-To is present, but a usable email address could " +
+          "not be extracted from its first value."
+        );
+      }
+
+      if (
+        fromAddress &&
+        returnPathAddress &&
+        getDomain(fromAddress) !== getDomain(returnPathAddress)
+      ) {
+        findings.push(
+          `Return-Path domain differs from From domain: ` +
+          `${fromAddress} vs ${returnPathAddress}. This can be ` +
+          `legitimate; review the context.`
+        );
+      }
+
+      if (
+        fromAddress &&
+        fields["return-path"]?.[0] &&
+        !returnPathAddress
+      ) {
+        findings.push(
+          "Return-Path is present, but a usable email address " +
+          "could not be extracted from its first value."
+        );
+      }
+
+      if (findings.length === 0) {
+        addFinding(
+          identityReview,
+          "No domain mismatch detected among the available parsed " +
+          "addresses. This does not establish that the email is safe.",
+          "info"
+        );
+      } else {
+        for (const finding of findings) {
+          addFinding(identityReview, finding, "warning");
+        }
+      }
+
+      const comparison = document.createElement("p");
+      comparison.className = "empty";
+      comparison.textContent =
+        `From: ${fromAddress || "Not parsed"} · ` +
+        `Reply-To: ${replyAddress || "Not parsed"} · ` +
+        `Return-Path: ${returnPathAddress || "Not parsed"}`;
+
+      identityReview.appendChild(comparison);
+    }
+
+    function renderResults(fields) {
+      fieldsContainer.replaceChildren();
+      identityReview.replaceChildren();
+
+      const fieldNames = Object.keys(fields);
+
+      const count = fieldNames.reduce(
+        (total, name) => total + fields[name].length,
+        0
+      );
+
+      summary.textContent =
+        `Header fields found: ${count} · ` +
+        `Unique field names: ${fieldNames.length}`;
+
+      if (count === 0) {
+        addFinding(
+          fieldsContainer,
+          "No valid header fields were found. Check the pasted format.",
+          "warning"
+        );
+        results.style.display = "block";
+        return;
+      }
+
+      // This call ensures the identity review is always rendered.
+      renderIdentityReview(fields);
+
+      const preferredOrder = [
+        "from",
+        "reply-to",
+        "return-path",
+        "to",
+        "cc",
+        "subject",
+        "date",
+        "message-id",
+        "received",
+        "authentication-results",
+        "received-spf",
+        "dkim-signature",
+        "mime-version",
+        "content-type"
+      ];
+
+      const orderedNames = [
+        ...preferredOrder.filter(name => fields[name]),
+        ...fieldNames.filter(name => !preferredOrder.includes(name))
+      ];
+
+      for (const name of orderedNames) {
         const values = fields[name];
 
-        if (values && values.length > 0) {
-            addField(
-                results,
-                name,
-                values.join("\n\n--------------------\n\n")
-            );
-        }
+        // Keep repeated fields visible and clearly separated.
+        const combinedValues = values
+          .map((value, index) =>
+            `[Value ${index + 1}]\n${value}`
+          )
+          .join("\n\n--------------------\n\n");
+
+        addField(fieldsContainer, name, combinedValues);
+      }
+
+      results.style.display = "block";
     }
 
-    const knownSet = new Set(KNOWN_FIELDS);
+    function analyzeHeaders() {
+      const rawText = rawHeadersInput.value.trim();
 
-    for (const [name, values] of Object.entries(fields)) {
-        if (!knownSet.has(name)) {
-            addField(results, name, values.join("\n\n"));
-            
-            function extractAddress(value) {
-                if (!value) return "";
+      if (!rawText) {
+        status.textContent = "Please paste some email headers first.";
+        results.style.display = "none";
+        rawHeadersInput.focus();
+        return;
+      }
 
-                const angleAddress = value.match(/<([^<>]+)>/);
+      try {
+        const fields = parseRawHeaders(rawText);
+        renderResults(fields);
 
-                const candidate = angleAddress
-                    ? angleAddress[1]
-                    : value.trim();
+        const count = Object.values(fields).reduce(
+          (total, values) => total + values.length,
+          0
+        );
 
-                const emailMatch = candidate.match(
-                    /^[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+$/
-                );
-
-                return emailMatch ? emailMatch[0].toLowerCase() : "";
-            }
-
-            const fromAddress = extractAddress(
-                fields["from"]?.[0]
-            );
-
-            const replyAddress = extractAddress(
-                fields["reply-to"]?.[0]
-            );
-
-            const returnPathAddress = extractAddress(
-                fields["return-path"]?.[0]
-            );
-
-            const identityFindings = [];
-
-            if (
-                fromAddress &&
-                replyAddress &&
-                fromAddress.split("@")[1] !== replyAddress.split("@")[1]
-            ) {
-                identityFindings.push(
-                    `Reply-To domain differs from From domain: ${fromAddress} vs ${replyAddress}. Review the reason for this difference.`
-                );
-            }
-
-            if (
-                fromAddress &&
-                returnPathAddress &&
-                fromAddress.split("@")[1] !== returnPathAddress.split("@")[1]
-            ) {
-                identityFindings.push(
-                    `Return-Path domain differs from From domain: ${fromAddress} vs ${returnPathAddress}. This can be legitimate; review the context.`
-                );
-            }
-
-            addField(
-                results,
-                "Sender identity review",
-                identityFindings.length
-                    ? identityFindings.join("\n\n")
-                    : "No domain mismatch detected among the available parsed addresses."
-            );
-
-        }
+        status.textContent =
+          `Analysis complete. Parsed ${count} header field instances.`;
+      } catch (error) {
+        console.error("Mailshield header analysis error:", error);
+        status.textContent =
+          "An error occurred while analyzing the headers. Check the browser console.";
+      }
     }
 
-    const note = document.createElement("p");
-    note.className = "warning";
-    note.textContent =
-        "Important: parsed header values are not proof of sender identity. " +
-        "Authentication-Results text may be forged in pasted data. " +
-        "Verification requires trustworthy evidence from the receiving mail system.";
+    analyzeBtn.addEventListener("click", analyzeHeaders);
 
-    results.appendChild(note);
-    results.classList.remove("hidden");
-}
+    sampleBtn.addEventListener("click", () => {
+      rawHeadersInput.value = sampleHeaders;
+      status.textContent =
+        "Sample loaded. Click Analyze Headers to run the test.";
+      results.style.display = "none";
+    });
 
-document.getElementById("analyzeButton").addEventListener(
-    "click",
-    () => {
-        const rawText =
-            document.getElementById("rawHeaders").value;
+    clearBtn.addEventListener("click", () => {
+      rawHeadersInput.value = "";
+      fieldsContainer.replaceChildren();
+      identityReview.replaceChildren();
+      summary.textContent = "";
+      results.style.display = "none";
+      status.textContent = "Cleared. Ready for another test.";
+      rawHeadersInput.focus();
+    });
 
-        const error = document.getElementById("error");
-        const results = document.getElementById("results");
-
-        error.textContent = "";
-        error.classList.add("hidden");
-        results.classList.add("hidden");
-
-        if (!rawText.trim()) {
-            error.textContent = "Paste some email headers first.";
-            error.classList.remove("hidden");
-            return;
-        }
-
-        try {
-            const fields = parseRawHeaders(rawText);
-            renderResults(fields);
-        } catch (exception) {
-            error.textContent =
-                "Could not parse the input. Check the text and try again.";
-            error.classList.remove("hidden");
-            console.error("Mailshield parser error:", exception);
-        }
-    }
-);
-
-document.getElementById("clearButton").addEventListener(
-    "click",
-    () => {
-        document.getElementById("results").replaceChildren();
-        document.getElementById("results").classList.add("hidden");
-        document.getElementById("error").textContent = "";
-        document.getElementById("error").classList.add("hidden");
-    }
-);
-</script>
+    // Load the sample on first opening for convenient testing.
+    rawHeadersInput.value = sampleHeaders;
+  </script>
 </body>
 </html>
