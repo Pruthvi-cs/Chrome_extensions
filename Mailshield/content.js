@@ -531,14 +531,6 @@ function checkUrlRisk(rawUrl, displayedText = "") {
                 });
             }
 
-            card.append(
-                text,
-                url,
-                category,
-                status,
-                findings
-            );
-
             linksContainer.appendChild(card);
         });
 
