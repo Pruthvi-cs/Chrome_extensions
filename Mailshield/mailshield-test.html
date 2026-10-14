@@ -60,6 +60,8 @@
         <button class="primary" id="analyzeBtn" type="button">Analyze Headers</button>
         <button class="secondary" id="sampleBtn" type="button">Load Test Sample</button>
         <button class="secondary" id="timeSampleBtn" type="button">Load Time Zone Test</button>
+        <button class="secondary" id="edgeSampleBtn" type="button">Load Time Zone Edge Test</button>
+        <button class="secondary" id="invalidDateSampleBtn" type="button">Load Invalid Date Test</button>
         <button class="secondary" id="clearBtn" type="button">Clear</button>
       </div>
       <div id="status" role="status" aria-live="polite">Ready. Paste headers or load a test sample.</div>
@@ -100,6 +102,8 @@
     const analyzeBtn = document.getElementById("analyzeBtn");
     const sampleBtn = document.getElementById("sampleBtn");
     const timeSampleBtn = document.getElementById("timeSampleBtn");
+    const edgeSampleBtn = document.getElementById("edgeSampleBtn");
+    const invalidDateSampleBtn = document.getElementById("invalidDateSampleBtn");
     const clearBtn = document.getElementById("clearBtn");
     const status = document.getElementById("status");
     const results = document.getElementById("results");
@@ -130,6 +134,22 @@ To: analyst@example.com
 Subject: Mailshield Time Zone Test
 Received: from relay-a.example.org by relay-b.example.org; Mon, 12 Oct 2026 16:00:00 +0530
 Received: from sender.example.org by relay-a.example.org; Mon, 12 Oct 2026 10:25:00 +0000`;
+
+    // Named-zone and midnight-boundary test. These timestamps should normalize
+    // to 18:35, 18:38, and 18:40 UTC in chronological order.
+    const timeZoneEdgeTestHeaders = `From: alerts@example.org
+To: analyst@example.com
+Subject: Mailshield Time Zone Edge Test
+Received: from relay-c.example.org by relay-d.example.org; Tue, 13 Oct 2026 00:10:00 +0530
+Received: from relay-b.example.org by relay-c.example.org; Mon, 12 Oct 2026 14:38:00 EDT
+Received: from sender.example.org by relay-b.example.org; Mon, 12 Oct 2026 18:35:00 GMT`;
+
+    const invalidDateTestHeaders = `From: alerts@example.org
+To: analyst@example.com
+Subject: Mailshield Invalid Date Test
+Received: from relay-a.example.org by relay-b.example.org; Tue, 13 Oct 2026 10:00:00 +0000
+Received: from relay-b.example.org by relay-c.example.org; Mon, 32 Oct 2026 10:00:00 +0000
+Received: from sender.example.org by relay-b.example.org; Mon, 12 Oct 2026 25:61:00 +0000`;
 
     // A. Parse headers, unfold continuation lines, and preserve repeated fields.
     function parseRawHeaders(rawText) {
@@ -254,28 +274,116 @@ Received: from sender.example.org by relay-a.example.org; Mon, 12 Oct 2026 10:25
       return { originalIndex, raw: value, fromHost, byHost, hasDateSection, dateText, timestamp, notes };
     }
 
-    // Parse common RFC-style date/time zones. A date without an explicit recognized zone is not used for ordering comparisons.
+    // Strictly parse common RFC-style dates and explicit time zones.
+    // Numeric offsets are unambiguous. US abbreviations use common US offsets,
+    // but abbreviations such as CST can mean different zones in other regions.
     function parseReceivedTimestamp(dateText) {
-      if (!dateText) return { ok: false, epochMs: null, isoUtc: "", zone: "", note: "No date section available to parse." };
+      if (!dateText) {
+        return { ok: false, epochMs: null, isoUtc: "", zone: "", note: "No date section available to parse." };
+      }
 
       const text = dateText.trim().replace(/\s+/g, " ");
-      const zoneMatch = text.match(/(?:\s|^)(Z|UTC|GMT|UT|EST|EDT|CST|CDT|MST|MDT|PST|PDT|[+-]\d{4})$/i);
-      if (!zoneMatch) {
-        return { ok: false, epochMs: null, isoUtc: "", zone: "", note: "Timestamp could not be safely compared: no explicit recognized time-zone designator was found." };
+      const match = text.match(
+        /^(?:(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\s*,\s*)?(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s+(Z|UTC|GMT|UT|EST|EDT|CST|CDT|MST|MDT|PST|PDT|[+-]\d{4}|[+-]\d{2}:\d{2})$/i
+      );
+
+      if (!match) {
+        return {
+          ok: false, epochMs: null, isoUtc: "", zone: "",
+          note: "Timestamp could not be parsed in the supported date format or has no recognized explicit time-zone designator."
+        };
       }
 
-      const zone = zoneMatch[1].toUpperCase();
-      const epochMs = Date.parse(text);
-      if (!Number.isFinite(epochMs)) {
-        return { ok: false, epochMs: null, isoUtc: "", zone, note: "A date section was present, but its timestamp could not be parsed." };
+      const [, weekday, dayText, monthText, yearText, hourText, minuteText, secondText, zoneText] = match;
+      const day = Number(dayText);
+      const year = Number(yearText);
+      const hour = Number(hourText);
+      const minute = Number(minuteText);
+      const second = secondText === undefined ? 0 : Number(secondText);
+      const monthNames = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+      const month = monthNames.indexOf(monthText.toLowerCase());
+
+      if (year < 1900 || year > 9999 || month < 0 || day < 1 || day > 31 ||
+          hour < 0 || hour > 23 || minute < 0 || minute > 59 || second < 0 || second > 59) {
+        return {
+          ok: false, epochMs: null, isoUtc: "", zone: zoneText.toUpperCase(),
+          note: "Timestamp contains an out-of-range date or clock value."
+        };
       }
+
+      // Build a UTC representation of the stated wall-clock fields, then validate
+      // the calendar components before applying the stated zone offset.
+      const wallClock = new Date(0);
+      wallClock.setUTCFullYear(year, month, day);
+      wallClock.setUTCHours(hour, minute, second, 0);
+
+      if (wallClock.getUTCFullYear() !== year ||
+          wallClock.getUTCMonth() !== month ||
+          wallClock.getUTCDate() !== day ||
+          wallClock.getUTCHours() !== hour ||
+          wallClock.getUTCMinutes() !== minute ||
+          wallClock.getUTCSeconds() !== second) {
+        return {
+          ok: false, epochMs: null, isoUtc: "", zone: zoneText.toUpperCase(),
+          note: "Timestamp contains an impossible calendar date or clock value."
+        };
+      }
+
+      const zone = zoneText.toUpperCase();
+      const namedOffsets = {
+        Z: 0, UTC: 0, GMT: 0, UT: 0,
+        EST: -300, EDT: -240,
+        CST: -360, CDT: -300,
+        MST: -420, MDT: -360,
+        PST: -480, PDT: -420
+      };
+
+      let offsetMinutes;
+      if (Object.prototype.hasOwnProperty.call(namedOffsets, zone)) {
+        offsetMinutes = namedOffsets[zone];
+      } else {
+        const offsetMatch = zone.match(/^([+-])(\d{2}):?(\d{2})$/);
+        if (!offsetMatch) {
+          return {
+            ok: false, epochMs: null, isoUtc: "", zone,
+            note: "Timestamp uses an unsupported time-zone designator."
+          };
+        }
+
+        const offsetHours = Number(offsetMatch[2]);
+        const offsetMins = Number(offsetMatch[3]);
+        if (offsetHours > 23 || offsetMins > 59) {
+          return {
+            ok: false, epochMs: null, isoUtc: "", zone,
+            note: "Time-zone offset is outside the supported numeric range."
+          };
+        }
+        const sign = offsetMatch[1] === "+" ? 1 : -1;
+        offsetMinutes = sign * (offsetHours * 60 + offsetMins);
+      }
+
+      const epochMs = wallClock.getTime() - offsetMinutes * 60000;
+      if (!Number.isFinite(epochMs)) {
+        return {
+          ok: false, epochMs: null, isoUtc: "", zone,
+          note: "Timestamp could not be converted to UTC."
+        };
+      }
+
+      // If a weekday is supplied, report its consistency as a note without
+      // changing the timestamp result; date/time remains the basis for ordering.
+      const actualWeekday = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][wallClock.getUTCDay()];
+      const weekdayNote = weekday && weekday.toLowerCase() !== actualWeekday.toLowerCase()
+        ? ` The stated weekday (${weekday}) does not match the calendar date (${actualWeekday}).`
+        : "";
 
       return {
         ok: true,
         epochMs,
         isoUtc: new Date(epochMs).toISOString(),
         zone,
-        note: ""
+        offsetMinutes,
+        note: weekdayNote
       };
     }
 
@@ -435,7 +543,8 @@ Received: from sender.example.org by relay-a.example.org; Mon, 12 Oct 2026 10:25
           `Raw date: ${record.dateText || "Unavailable"}\n` +
           `Stated zone: ${parsed.zone || "Unavailable"}\n` +
           `Normalized UTC: ${parsed.ok ? formatUtc(parsed.epochMs) : "Unavailable"}\n` +
-          `Parse status: ${parsed.ok ? "Parsed" : parsed.note}`;
+          `Parse status: ${parsed.ok ? "Parsed" : parsed.note}` +
+          `${parsed.ok && parsed.note ? "\\nReview note: " + parsed.note.trim() : ""}`;
         row.append(heading, value);
         table.appendChild(row);
         if (parsed.ok) parsedCount++;
@@ -479,7 +588,7 @@ Received: from sender.example.org by relay-a.example.org; Mon, 12 Oct 2026 10:25
         `Timestamp summary: ${parsedCount} parsed, ${skippedCount} unavailable or unparseable, ${anomalies} possible ordering anomaly/anomalies. Comparison tolerance: ${CLOCK_SKEW_TOLERANCE_MS / 60000} minutes.`,
         "neutral");
       addFinding(timestampReview,
-        "Time-zone offsets are used to normalize stated times to UTC. An offset does not prove a server's physical location, and these pasted timestamps are not authenticated.",
+        "Numeric offsets are normalized directly. Common US abbreviations (EST/EDT, CST/CDT, MST/MDT, PST/PDT) use their conventional US offsets; abbreviations can be ambiguous outside that convention. An offset does not prove a server's physical location, and these pasted timestamps are not authenticated.",
         "neutral");
     }
 
@@ -554,6 +663,16 @@ Received: from sender.example.org by relay-a.example.org; Mon, 12 Oct 2026 10:25
     timeSampleBtn.addEventListener("click", () => {
       rawHeadersInput.value = timeZoneTestHeaders;
       status.textContent = "Time-zone test loaded. Click Analyze Headers to compare timestamps normalized to UTC.";
+      results.style.display = "none";
+    });
+    edgeSampleBtn.addEventListener("click", () => {
+      rawHeadersInput.value = timeZoneEdgeTestHeaders;
+      status.textContent = "Time-zone edge test loaded. It covers GMT, EDT, +0530, and a local date crossing midnight.";
+      results.style.display = "none";
+    });
+    invalidDateSampleBtn.addEventListener("click", () => {
+      rawHeadersInput.value = invalidDateTestHeaders;
+      status.textContent = "Invalid-date test loaded. It includes an impossible calendar date and an invalid clock value.";
       results.style.display = "none";
     });
     clearBtn.addEventListener("click", () => {
