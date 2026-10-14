@@ -1,275 +1,68 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mailshield | Email Header Analyzer</title>
-
   <style>
     * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      padding: 30px 16px;
-      min-height: 100vh;
-      background: #0b1120;
-      color: #e5e7eb;
-      font-family: Arial, sans-serif;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 950px;
-      margin: auto;
-    }
-
+    body { margin: 0; padding: 30px 16px; min-height: 100vh; background: #0b1120; color: #e5e7eb; font-family: Arial, sans-serif; }
+    .container { width: 100%; max-width: 950px; margin: auto; }
     header { margin-bottom: 28px; }
-
-    .brand {
-      color: #60a5fa;
-      font-size: 13px;
-      font-weight: bold;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-
+    .brand { color: #60a5fa; font-size: 13px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; }
     h1 { margin: 10px 0; font-size: 32px; }
     h2 { margin-top: 0; }
     h3 { margin-top: 24px; }
-
-    .subtitle, .muted {
-      color: #9ca3af;
-      line-height: 1.7;
-    }
-
+    .subtitle, .muted { color: #9ca3af; line-height: 1.7; }
     .muted { font-size: 13px; }
-
-    .panel {
-      padding: 22px;
-      margin-bottom: 20px;
-      background: #111827;
-      border: 1px solid #263244;
-      border-radius: 14px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 12px;
-      font-weight: bold;
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 280px;
-      padding: 14px;
-      resize: vertical;
-      border: 1px solid #374151;
-      border-radius: 9px;
-      outline: none;
-      background: #080d18;
-      color: #d1fae5;
-      font-family: Consolas, monospace;
-      font-size: 13px;
-      line-height: 1.7;
-    }
-
+    .panel { padding: 22px; margin-bottom: 20px; background: #111827; border: 1px solid #263244; border-radius: 14px; }
+    label { display: block; margin-bottom: 12px; font-weight: bold; }
+    textarea { width: 100%; min-height: 280px; padding: 14px; resize: vertical; border: 1px solid #374151; border-radius: 9px; outline: none; background: #080d18; color: #d1fae5; font-family: Consolas, monospace; font-size: 13px; line-height: 1.7; }
     textarea:focus { border-color: #60a5fa; }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    button {
-      padding: 11px 17px;
-      border: 0;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    button { padding: 11px 17px; border: 0; border-radius: 8px; cursor: pointer; font-weight: bold; }
     button:hover { opacity: 0.88; }
-
-    button:focus-visible {
-      outline: 2px solid #93c5fd;
-      outline-offset: 3px;
-    }
-
+    button:focus-visible { outline: 2px solid #93c5fd; outline-offset: 3px; }
     .primary { background: #2563eb; color: white; }
     .secondary { background: #273449; color: #e5e7eb; }
-
-    #status {
-      margin-top: 12px;
-      color: #9ca3af;
-      font-size: 13px;
-      line-height: 1.6;
-    }
-
+    #status { margin-top: 12px; color: #9ca3af; font-size: 13px; line-height: 1.6; }
     #results { display: none; }
-
-    .summary {
-      margin-bottom: 18px;
-      padding: 14px;
-      background: #0b1220;
-      border: 1px solid #263244;
-      border-radius: 9px;
-      line-height: 1.7;
-    }
-
-    .field {
-      margin-top: 12px;
-      padding: 15px;
-      background: #0b1220;
-      border: 1px solid #263244;
-      border-radius: 9px;
-    }
-
-    .field-name {
-      margin-bottom: 9px;
-      color: #93c5fd;
-      font-size: 12px;
-      font-weight: bold;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-
-    .field-value {
-      overflow-wrap: anywhere;
-      white-space: pre-wrap;
-      color: #e5e7eb;
-      font-family: Consolas, monospace;
-      font-size: 13px;
-      line-height: 1.7;
-    }
-
-    .finding {
-      padding: 12px;
-      margin-top: 8px;
-      border-radius: 7px;
-      line-height: 1.7;
-      overflow-wrap: anywhere;
-    }
-
-    .finding.warning {
-      background: #422006;
-      border: 1px solid #92400e;
-      color: #fde68a;
-    }
-
-    .finding.info {
-      background: #102b25;
-      border: 1px solid #166534;
-      color: #bbf7d0;
-    }
-
-    .finding.neutral {
-      background: #172033;
-      border: 1px solid #334155;
-      color: #cbd5e1;
-    }
-
-    .step {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 14px;
-      margin-top: 10px;
-      border: 1px solid #263244;
-      border-radius: 9px;
-      background: #0b1220;
-    }
-
-    .step-number {
-      flex-shrink: 0;
-      display: grid;
-      place-items: center;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: #1d4ed8;
-      color: white;
-      font-weight: bold;
-    }
-
+    .summary { margin-bottom: 18px; padding: 14px; background: #0b1220; border: 1px solid #263244; border-radius: 9px; line-height: 1.7; }
+    .field { margin-top: 12px; padding: 15px; background: #0b1220; border: 1px solid #263244; border-radius: 9px; }
+    .field-name { margin-bottom: 9px; color: #93c5fd; font-size: 12px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
+    .field-value { overflow-wrap: anywhere; white-space: pre-wrap; color: #e5e7eb; font-family: Consolas, monospace; font-size: 13px; line-height: 1.7; }
+    .finding { padding: 12px; margin-top: 8px; border-radius: 7px; line-height: 1.7; overflow-wrap: anywhere; }
+    .finding.warning { background: #422006; border: 1px solid #92400e; color: #fde68a; }
+    .finding.info { background: #102b25; border: 1px solid #166534; color: #bbf7d0; }
+    .finding.neutral { background: #172033; border: 1px solid #334155; color: #cbd5e1; }
+    .step { display: flex; align-items: flex-start; gap: 12px; padding: 14px; margin-top: 10px; border: 1px solid #263244; border-radius: 9px; background: #0b1220; }
+    .step-number { flex-shrink: 0; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #1d4ed8; color: white; font-weight: bold; }
     .step-content { min-width: 0; flex: 1; }
-
-    .step-content strong {
-      display: block;
-      margin-bottom: 6px;
-      overflow-wrap: anywhere;
-    }
-
-    .step-content p {
-      margin: 0;
-      color: #9ca3af;
-      font-size: 13px;
-      line-height: 1.6;
-      overflow-wrap: anywhere;
-    }
-
-    .notice {
-      padding: 15px;
-      background: #291b12;
-      border: 1px solid #854d0e;
-      border-radius: 9px;
-      color: #fed7aa;
-      font-size: 13px;
-      line-height: 1.8;
-    }
-
-    footer {
-      padding: 8px 0;
-      color: #6b7280;
-      font-size: 12px;
-      line-height: 1.7;
-    }
-
-    @media (max-width: 600px) {
-      body { padding: 18px 10px; }
-      .panel { padding: 15px; }
-      h1 { font-size: 26px; }
-    }
+    .step-content strong { display: block; margin-bottom: 6px; overflow-wrap: anywhere; }
+    .step-content p { margin: 0; color: #9ca3af; font-size: 13px; line-height: 1.6; overflow-wrap: anywhere; }
+    .notice { padding: 15px; background: #291b12; border: 1px solid #854d0e; border-radius: 9px; color: #fed7aa; font-size: 13px; line-height: 1.8; }
+    footer { padding: 8px 0; color: #6b7280; font-size: 12px; line-height: 1.7; }
+    @media (max-width: 600px) { body { padding: 18px 10px; } .panel { padding: 15px; } h1 { font-size: 26px; } }
   </style>
 </head>
-
 <body>
   <main class="container">
     <header>
       <div class="brand">Mailshield / Digital Forensics</div>
       <h1>Email Header Analyzer</h1>
-      <p class="subtitle">
-        Parse email headers, compare sender addresses, inspect repeated
-        Received fields, and reconstruct an apparent mail-server relay path.
-      </p>
+      <p class="subtitle">Parse email headers, compare sender addresses, inspect repeated Received fields, reconstruct an apparent mail-server relay path, and review Received timestamps and time zones.</p>
     </header>
 
     <section class="panel">
       <label for="rawHeaders">Raw email headers</label>
-
-      <textarea
-        id="rawHeaders"
-        spellcheck="false"
-        placeholder="Paste raw email headers here..."
-      ></textarea>
-
+      <textarea id="rawHeaders" spellcheck="false" placeholder="Paste raw email headers here..."></textarea>
       <div class="actions">
-        <button class="primary" id="analyzeBtn" type="button">
-          Analyze Headers
-        </button>
-        <button class="secondary" id="sampleBtn" type="button">
-          Load Test Sample
-        </button>
-        <button class="secondary" id="clearBtn" type="button">
-          Clear
-        </button>
+        <button class="primary" id="analyzeBtn" type="button">Analyze Headers</button>
+        <button class="secondary" id="sampleBtn" type="button">Load Test Sample</button>
+        <button class="secondary" id="timeSampleBtn" type="button">Load Time Zone Test</button>
+        <button class="secondary" id="clearBtn" type="button">Clear</button>
       </div>
-
-      <div id="status" role="status" aria-live="polite">
-        Ready. Paste headers or load the test sample.
-      </div>
+      <div id="status" role="status" aria-live="polite">Ready. Paste headers or load a test sample.</div>
     </section>
 
     <section class="panel" id="results">
@@ -280,13 +73,13 @@
       <div id="identityReview"></div>
 
       <h3>Received Header Analysis</h3>
-      <p class="muted">
-        Received fields are displayed in their original order.
-        The apparent path is reconstructed in reverse field order,
-        oldest first. This is a heuristic, not a verified network route.
-      </p>
+      <p class="muted">Received fields are displayed in their original order. The apparent path is reconstructed in reverse field order, oldest first. This is a heuristic, not a verified network route.</p>
       <div id="receivedSummary"></div>
       <div id="relayPath"></div>
+
+      <h3>Received Timestamp &amp; Time Zone Review</h3>
+      <p class="muted">Dates are parsed from the semicolon-separated date section and normalized to UTC for comparison. A five-minute tolerance is used to avoid overreacting to small server clock differences. Results are review signals only.</p>
+      <div id="timestampReview"></div>
 
       <h3>Parsed Header Fields</h3>
       <div id="fields"></div>
@@ -294,19 +87,10 @@
 
     <section class="notice">
       <strong>Important security limitation</strong><br>
-      This tool parses pasted text only. Header values, including
-      Authentication-Results, may be forged. A sender-domain mismatch
-      or unusual Received field does not prove phishing.
-
-      This page does not verify SPF, DKIM, DMARC, message signatures,
-      IP ownership, DNS records, server identity, or the authenticity
-      of the receiving mail system. Received-header analysis is a
-      preliminary review aid, not a security verdict.
+      This tool parses pasted text only. Header values, including Authentication-Results, may be forged. A sender-domain mismatch, unusual Received field, or timestamp anomaly does not prove phishing.
+      This page does not verify SPF, DKIM, DMARC, message signatures, IP ownership, DNS records, server identity, or the authenticity of the receiving mail system. Received-header analysis is a preliminary review aid, not a security verdict.
     </section>
-
-    <footer>
-      Mailshield local testing tool · No network requests are made by this page.
-    </footer>
+    <footer>Mailshield local testing tool · No network requests are made by this page.</footer>
   </main>
 
   <script>
@@ -315,15 +99,19 @@
     const rawHeadersInput = document.getElementById("rawHeaders");
     const analyzeBtn = document.getElementById("analyzeBtn");
     const sampleBtn = document.getElementById("sampleBtn");
+    const timeSampleBtn = document.getElementById("timeSampleBtn");
     const clearBtn = document.getElementById("clearBtn");
     const status = document.getElementById("status");
-
     const results = document.getElementById("results");
     const summary = document.getElementById("summary");
     const identityReview = document.getElementById("identityReview");
     const receivedSummary = document.getElementById("receivedSummary");
     const relayPath = document.getElementById("relayPath");
+    const timestampReview = document.getElementById("timestampReview");
     const fieldsContainer = document.getElementById("fields");
+
+    // Clock differences under this threshold are noted but not flagged as a strong ordering anomaly.
+    const CLOCK_SKEW_TOLERANCE_MS = 5 * 60 * 1000;
 
     const sampleHeaders = `From: alerts@example.org
 Reply-To: support@example.net
@@ -337,20 +125,21 @@ Authentication-Results: mx.example.org;
     dkim=pass header.d=example.org;
     dmarc=pass header.from=example.org`;
 
-    // A. Parse headers, unfold continuation lines, preserve duplicates.
+    const timeZoneTestHeaders = `From: alerts@example.org
+To: analyst@example.com
+Subject: Mailshield Time Zone Test
+Received: from relay-a.example.org by relay-b.example.org; Mon, 12 Oct 2026 16:00:00 +0530
+Received: from sender.example.org by relay-a.example.org; Mon, 12 Oct 2026 10:25:00 +0000`;
+
+    // A. Parse headers, unfold continuation lines, and preserve repeated fields.
     function parseRawHeaders(rawText) {
       const fields = Object.create(null);
-
-      const normalized = rawText
-        .replace(/\r\n/g, "\n")
-        .replace(/\r/g, "\n");
-
+      const normalized = rawText.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
       const unfoldedLines = [];
 
       for (const line of normalized.split("\n")) {
         if (/^[ \t]/.test(line) && unfoldedLines.length > 0) {
-          unfoldedLines[unfoldedLines.length - 1] +=
-            " " + line.trim();
+          unfoldedLines[unfoldedLines.length - 1] += " " + line.trim();
         } else {
           unfoldedLines.push(line);
         }
@@ -358,64 +147,45 @@ Authentication-Results: mx.example.org;
 
       for (const line of unfoldedLines) {
         if (!line.trim()) continue;
-
         const separator = line.indexOf(":");
         if (separator <= 0) continue;
-
         const name = line.slice(0, separator).trim();
         const value = line.slice(separator + 1).trim();
-
-        if (!/^[!-9;-~]+$/.test(name)) continue;
-
+        if (!/^[!-9;-\~]+$/.test(name)) continue;
         const key = name.toLowerCase();
-
         if (!fields[key]) fields[key] = [];
         fields[key].push(value);
       }
-
       return fields;
     }
 
     // B. Lightweight email address extraction.
     function extractAddress(value) {
       if (!value) return "";
-
       const input = value.trim();
       const angleAddress = input.match(/<([^<>]+)>/);
-      const candidate = angleAddress
-        ? angleAddress[1].trim()
-        : input;
-
-      if (!/^[^@\s<>]+@[^@\s<>]+$/.test(candidate)) {
-        return "";
-      }
-
+      const candidate = angleAddress ? angleAddress[1].trim() : input;
+      if (!/^[^@\s<>]+@[^@\s<>]+$/.test(candidate)) return "";
       const parts = candidate.split("@");
       if (parts.length !== 2 || !parts[1]) return "";
-
       return candidate.toLowerCase();
     }
 
     function getDomain(address) {
       const atIndex = address.lastIndexOf("@");
-      return atIndex < 0
-        ? ""
-        : address.slice(atIndex + 1).toLowerCase();
+      return atIndex < 0 ? "" : address.slice(atIndex + 1).toLowerCase();
     }
 
     // Safe rendering: never interpret untrusted header text as HTML.
     function addField(container, name, value) {
       const card = document.createElement("div");
       card.className = "field";
-
       const title = document.createElement("div");
       title.className = "field-name";
       title.textContent = name;
-
       const content = document.createElement("div");
       content.className = "field-value";
       content.textContent = value;
-
       card.append(title, content);
       container.appendChild(card);
     }
@@ -430,199 +200,115 @@ Authentication-Results: mx.example.org;
     // C. Compare sender-related domains.
     function renderIdentityReview(fields) {
       identityReview.replaceChildren();
-
       const fromAddress = extractAddress(fields["from"]?.[0]);
       const replyAddress = extractAddress(fields["reply-to"]?.[0]);
-      const returnPathAddress = extractAddress(
-        fields["return-path"]?.[0]
-      );
-
+      const returnPathAddress = extractAddress(fields["return-path"]?.[0]);
       const findings = [];
 
       if (!fromAddress) {
-        findings.push(
-          "A usable From address could not be extracted. " +
-          "The sender-domain comparison is incomplete."
-        );
+        findings.push("A usable From address could not be extracted. The sender-domain comparison is incomplete.");
       }
-
-      if (
-        fromAddress &&
-        replyAddress &&
-        getDomain(fromAddress) !== getDomain(replyAddress)
-      ) {
-        findings.push(
-          `Reply-To domain differs from From domain: ` +
-          `${fromAddress} vs ${replyAddress}. Review the context; ` +
-          "this difference can be legitimate."
-        );
+      if (fromAddress && replyAddress && getDomain(fromAddress) !== getDomain(replyAddress)) {
+        findings.push(`Reply-To domain differs from From domain: ${fromAddress} vs ${replyAddress}. Review the context; this difference can be legitimate.`);
       }
-
-      if (
-        fromAddress &&
-        fields["reply-to"]?.[0] &&
-        !replyAddress
-      ) {
-        findings.push(
-          "Reply-To is present, but its first value could not be " +
-          "parsed as a simple email address."
-        );
+      if (fromAddress && fields["reply-to"]?.[0] && !replyAddress) {
+        findings.push("Reply-To is present, but its first value could not be parsed as a simple email address.");
       }
-
-      if (
-        fromAddress &&
-        returnPathAddress &&
-        getDomain(fromAddress) !== getDomain(returnPathAddress)
-      ) {
-        findings.push(
-          `Return-Path domain differs from From domain: ` +
-          `${fromAddress} vs ${returnPathAddress}. This can be legitimate.`
-        );
+      if (fromAddress && returnPathAddress && getDomain(fromAddress) !== getDomain(returnPathAddress)) {
+        findings.push(`Return-Path domain differs from From domain: ${fromAddress} vs ${returnPathAddress}. This can be legitimate.`);
       }
-
-      if (
-        fromAddress &&
-        fields["return-path"]?.[0] &&
-        !returnPathAddress
-      ) {
-        findings.push(
-          "Return-Path is present, but its first value could not " +
-          "be parsed as a simple email address."
-        );
+      if (fromAddress && fields["return-path"]?.[0] && !returnPathAddress) {
+        findings.push("Return-Path is present, but its first value could not be parsed as a simple email address.");
       }
 
       if (findings.length === 0) {
-        addFinding(
-          identityReview,
-          "No domain mismatch detected among the available parsed " +
-          "addresses. This does not establish that the email is safe.",
-          "info"
-        );
+        addFinding(identityReview, "No domain mismatch detected among the available parsed addresses. This does not establish that the email is safe.", "info");
       } else {
-        for (const finding of findings) {
-          addFinding(identityReview, finding, "warning");
-        }
+        for (const finding of findings) addFinding(identityReview, finding, "warning");
       }
-
-      addFinding(
-        identityReview,
-        `From: ${fromAddress || "Not parsed"} | ` +
-        `Reply-To: ${replyAddress || "Not parsed"} | ` +
-        `Return-Path: ${returnPathAddress || "Not parsed"}`,
-        "neutral"
-      );
+      addFinding(identityReview,
+        `From: ${fromAddress || "Not parsed"} | Reply-To: ${replyAddress || "Not parsed"} | Return-Path: ${returnPathAddress || "Not parsed"}`,
+        "neutral");
     }
 
-    // D. Extract simple host tokens from a Received field.
+    // D. Parse host tokens and the semicolon-separated date section of a Received field.
     function parseReceivedHeader(value, originalIndex) {
-      const fromMatch = value.match(
-        /(?:^|\s)from\s+([^\s();]+)/i
-      );
-
-      const byMatch = value.match(
-        /(?:^|\s)by\s+([^\s();]+)/i
-      );
-
+      const fromMatch = value.match(/(?:^|\s)from\s+([^\s();]+)/i);
+      const byMatch = value.match(/(?:^|\s)by\s+([^\s();]+)/i);
       const dateParts = value.split(";");
-      const hasDateSection =
-        dateParts.length > 1 &&
-        dateParts.slice(1).join(";").trim() !== "";
-
-      const fromHost = fromMatch
-        ? fromMatch[1].replace(/[.,]+$/, "")
-        : "";
-
-      const byHost = byMatch
-        ? byMatch[1].replace(/[.,]+$/, "")
-        : "";
-
+      const dateText = dateParts.length > 1 ? dateParts.slice(1).join(";").trim() : "";
+      const hasDateSection = Boolean(dateText);
+      const fromHost = fromMatch ? fromMatch[1].replace(/[.,]+$/, "") : "";
+      const byHost = byMatch ? byMatch[1].replace(/[.,]+$/, "") : "";
+      const timestamp = parseReceivedTimestamp(dateText);
       const notes = [];
 
-      if (!fromHost) {
-        notes.push("Missing or unrecognized 'from' host.");
+      if (!fromHost) notes.push("Missing or unrecognized 'from' host.");
+      if (!byHost) notes.push("Missing or unrecognized 'by' host.");
+      if (fromHost && byHost && fromHost.toLowerCase() === byHost.toLowerCase()) {
+        notes.push("The extracted 'from' and 'by' hosts are identical; review the context.");
+      }
+      if (!hasDateSection) notes.push("No semicolon-separated date section was detected.");
+      else if (!timestamp.ok) notes.push(timestamp.note);
+
+      return { originalIndex, raw: value, fromHost, byHost, hasDateSection, dateText, timestamp, notes };
+    }
+
+    // Parse common RFC-style date/time zones. A date without an explicit recognized zone is not used for ordering comparisons.
+    function parseReceivedTimestamp(dateText) {
+      if (!dateText) return { ok: false, epochMs: null, isoUtc: "", zone: "", note: "No date section available to parse." };
+
+      const text = dateText.trim().replace(/\s+/g, " ");
+      const zoneMatch = text.match(/(?:\s|^)(Z|UTC|GMT|UT|EST|EDT|CST|CDT|MST|MDT|PST|PDT|[+-]\d{4})$/i);
+      if (!zoneMatch) {
+        return { ok: false, epochMs: null, isoUtc: "", zone: "", note: "Timestamp could not be safely compared: no explicit recognized time-zone designator was found." };
       }
 
-      if (!byHost) {
-        notes.push("Missing or unrecognized 'by' host.");
-      }
-
-      if (
-        fromHost &&
-        byHost &&
-        fromHost.toLowerCase() === byHost.toLowerCase()
-      ) {
-        notes.push(
-          "The extracted 'from' and 'by' hosts are identical; review the context."
-        );
-      }
-
-      if (!hasDateSection) {
-        notes.push("No semicolon-separated date section was detected.");
+      const zone = zoneMatch[1].toUpperCase();
+      const epochMs = Date.parse(text);
+      if (!Number.isFinite(epochMs)) {
+        return { ok: false, epochMs: null, isoUtc: "", zone, note: "A date section was present, but its timestamp could not be parsed." };
       }
 
       return {
-        originalIndex,
-        raw: value,
-        fromHost,
-        byHost,
-        hasDateSection,
-        notes
+        ok: true,
+        epochMs,
+        isoUtc: new Date(epochMs).toISOString(),
+        zone,
+        note: ""
       };
     }
 
-    // E. Render the apparent path and Received review.
+    function formatUtc(epochMs) {
+      if (!Number.isFinite(epochMs)) return "Unavailable";
+      return new Date(epochMs).toISOString().replace("T", " ").replace(".000Z", " UTC").replace("Z", " UTC");
+    }
+
+    // E. Render apparent path, Received review notes, and relay continuity.
     function renderReceivedAnalysis(fields) {
       receivedSummary.replaceChildren();
       relayPath.replaceChildren();
-
       const receivedValues = fields["received"] || [];
 
       if (receivedValues.length === 0) {
-        addFinding(
-          receivedSummary,
-          "No Received headers were found. A relay path cannot be reconstructed from this input.",
-          "neutral"
-        );
-
-        addFinding(
-          relayPath,
-          "No apparent relay path available.",
-          "neutral"
-        );
-
-        return;
+        addFinding(receivedSummary, "No Received headers were found. A relay path cannot be reconstructed from this input.", "neutral");
+        addFinding(relayPath, "No apparent relay path available.", "neutral");
+        return [];
       }
 
-      const parsed = receivedValues.map(
-        (value, index) => parseReceivedHeader(value, index)
-      );
+      const parsed = receivedValues.map((value, index) => parseReceivedHeader(value, index));
+      addFinding(receivedSummary,
+        `Received headers found: ${parsed.length}. They are displayed in their original order, usually newest first.`,
+        "info");
 
-      addFinding(
-        receivedSummary,
-        `Received headers found: ${parsed.length}. ` +
-        "They are displayed in their original order, usually newest first.",
-        "info"
-      );
-
-      // Reverse header order as a heuristic: oldest to newest.
       const chronological = [...parsed].reverse();
       const pathNodes = [];
-
       function pushNode(host) {
         if (!host) return;
-
         const previous = pathNodes[pathNodes.length - 1];
-
-        if (
-          previous &&
-          previous.host.toLowerCase() === host.toLowerCase()
-        ) {
-          return;
-        }
-
+        if (previous && previous.host.toLowerCase() === host.toLowerCase()) return;
         pathNodes.push({ host });
       }
-
       for (const record of chronological) {
         pushNode(record.fromHost);
         pushNode(record.byHost);
@@ -630,179 +316,171 @@ Authentication-Results: mx.example.org;
 
       const pathTitle = document.createElement("div");
       pathTitle.className = "field-name";
-      pathTitle.textContent =
-        "Apparent relay path · oldest to newest";
-
+      pathTitle.textContent = "Apparent relay path · oldest to newest";
       relayPath.appendChild(pathTitle);
 
       if (pathNodes.length === 0) {
-        addFinding(
-          relayPath,
-          "Received fields were found, but no simple relay path could be extracted. Inspect the original values below.",
-          "warning"
-        );
+        addFinding(relayPath, "Received fields were found, but no simple relay path could be extracted. Inspect the original values below.", "warning");
       } else {
         pathNodes.forEach((node, index) => {
           const step = document.createElement("div");
           step.className = "step";
-
           const number = document.createElement("div");
           number.className = "step-number";
           number.textContent = String(index + 1);
-
           const content = document.createElement("div");
           content.className = "step-content";
-
           const title = document.createElement("strong");
           title.textContent = node.host;
-
           const description = document.createElement("p");
-
-          if (index === 0) {
-            description.textContent =
-              "First extracted host in the reconstructed apparent path.";
-          } else if (index === pathNodes.length - 1) {
-            description.textContent =
-              "Last extracted host in the reconstructed apparent path.";
-          } else {
-            description.textContent =
-              "Extracted host in the apparent relay sequence.";
-          }
-
+          if (index === 0) description.textContent = "First extracted host in the reconstructed apparent path.";
+          else if (index === pathNodes.length - 1) description.textContent = "Last extracted host in the reconstructed apparent path.";
+          else description.textContent = "Extracted host in the apparent relay sequence.";
           content.append(title, description);
           step.append(number, content);
           relayPath.appendChild(step);
         });
       }
 
-      addFinding(
-        relayPath,
-        "This path is inferred from simple host tokens. It does not verify that the hosts are genuine or that the message followed this route.",
-        "neutral"
-      );
+      addFinding(relayPath, "This path is inferred from simple host tokens. It does not verify that the hosts are genuine or that the message followed this route.", "neutral");
 
-      // Group all review notes into one message per Received field.
       const reviewTitle = document.createElement("h3");
       reviewTitle.textContent = "Received Header Review Notes";
       relayPath.appendChild(reviewTitle);
-
       for (const record of parsed) {
         const label = `Received field ${record.originalIndex + 1}`;
-
         if (record.notes.length === 0) {
-          addFinding(
-            relayPath,
-            `${label}: Basic host extraction succeeded. ` +
-            "This does not verify that the hosts are genuine.",
-            "info"
-          );
+          addFinding(relayPath, `${label}: Basic host and timestamp extraction succeeded. This does not verify that the hosts are genuine.`, "info");
         } else {
-          addFinding(
-            relayPath,
-            `${label}: ${record.notes.join(" ")}`,
-            "warning"
-          );
+          addFinding(relayPath, `${label}: ${record.notes.join(" ")}`, "warning");
         }
       }
 
-      /*
-       * F. Improved relay continuity checks.
-       *
-       * Compare only when the older Received field's "by" host and
-       * the newer Received field's "from" host are both available.
-       *
-       * If either host is missing, report that the comparison was
-       * skipped. Do not label incomplete data a relay discontinuity.
-       */
       let comparisonsMade = 0;
       let comparisonsSkipped = 0;
       let mismatchesFound = 0;
-
       const continuityTitle = document.createElement("h3");
       continuityTitle.textContent = "Relay Continuity Review";
       relayPath.appendChild(continuityTitle);
 
       if (chronological.length < 2) {
-        addFinding(
-          relayPath,
-          "Not enough Received entries to compare adjacent relay relationships.",
-          "neutral"
-        );
+        addFinding(relayPath, "Not enough Received entries to compare adjacent relay relationships.", "neutral");
       } else {
-        for (
-          let index = 0;
-          index < chronological.length - 1;
-          index++
-        ) {
+        for (let index = 0; index < chronological.length - 1; index++) {
           const older = chronological[index];
           const newer = chronological[index + 1];
-
           const olderBy = older.byHost;
           const newerFrom = newer.fromHost;
 
           if (!olderBy || !newerFrom) {
             comparisonsSkipped++;
-
             const missing = [];
-
-            if (!olderBy) {
-              missing.push(
-                `the older entry's 'by' host is unavailable`
-              );
-            }
-
-            if (!newerFrom) {
-              missing.push(
-                `the newer entry's 'from' host is unavailable`
-              );
-            }
-
-            addFinding(
-              relayPath,
-              `Continuity comparison skipped between Received fields ` +
-              `${older.originalIndex + 1} and ${newer.originalIndex + 1}: ` +
-              `${missing.join(" and ")}. The relationship cannot be assessed from these extracted values.`,
-              "neutral"
-            );
-
+            if (!olderBy) missing.push("the older entry's 'by' host is unavailable");
+            if (!newerFrom) missing.push("the newer entry's 'from' host is unavailable");
+            addFinding(relayPath,
+              `Continuity comparison skipped between Received fields ${older.originalIndex + 1} and ${newer.originalIndex + 1}: ${missing.join(" and ")}. The relationship cannot be assessed from these extracted values.`,
+              "neutral");
             continue;
           }
 
           comparisonsMade++;
-
-          if (
-            olderBy.toLowerCase() !== newerFrom.toLowerCase()
-          ) {
+          if (olderBy.toLowerCase() !== newerFrom.toLowerCase()) {
             mismatchesFound++;
-
-            addFinding(
-              relayPath,
-              `Possible relay discontinuity between Received fields ` +
-              `${older.originalIndex + 1} and ${newer.originalIndex + 1}: ` +
-              `older 'by' host "${olderBy}" differs from newer ` +
-              `'from' host "${newerFrom}". This can be legitimate and ` +
-              "is not proof of spoofing.",
-              "warning"
-            );
+            addFinding(relayPath,
+              `Possible relay discontinuity between Received fields ${older.originalIndex + 1} and ${newer.originalIndex + 1}: older 'by' host "${olderBy}" differs from newer 'from' host "${newerFrom}". This can be legitimate and is not proof of spoofing.`,
+              "warning");
           } else {
-            addFinding(
-              relayPath,
-              `Received fields ${older.originalIndex + 1} and ` +
-              `${newer.originalIndex + 1}: extracted relay hosts line up ` +
-              `("${olderBy}"). This does not authenticate the route.`,
-              "info"
-            );
+            addFinding(relayPath,
+              `Received fields ${older.originalIndex + 1} and ${newer.originalIndex + 1}: extracted relay hosts line up ("${olderBy}"). This does not authenticate the route.`,
+              "info");
           }
         }
-
-        addFinding(
-          relayPath,
-          `Continuity summary: ${comparisonsMade} comparison(s) made, ` +
-          `${comparisonsSkipped} skipped because host information was ` +
-          `incomplete, ${mismatchesFound} possible mismatch(es) found.`,
-          "neutral"
-        );
+        addFinding(relayPath,
+          `Continuity summary: ${comparisonsMade} comparison(s) made, ${comparisonsSkipped} skipped because host information was incomplete, ${mismatchesFound} possible mismatch(es) found.`,
+          "neutral");
       }
+      return chronological;
+    }
+
+    // F. Compare timestamps in oldest-to-newest order after normalization to UTC.
+    function renderTimestampReview(chronological) {
+      timestampReview.replaceChildren();
+      if (!chronological || chronological.length === 0) {
+        addFinding(timestampReview, "No Received timestamps are available to review.", "neutral");
+        return;
+      }
+
+      let parsedCount = 0;
+      let skippedCount = 0;
+      let anomalies = 0;
+
+      const table = document.createElement("div");
+      table.className = "field";
+      const title = document.createElement("div");
+      title.className = "field-name";
+      title.textContent = "Timestamp details · oldest to newest";
+      table.appendChild(title);
+
+      chronological.forEach((record, index) => {
+        const row = document.createElement("div");
+        row.className = "field";
+        row.style.marginTop = "10px";
+        const heading = document.createElement("div");
+        heading.className = "field-name";
+        heading.textContent = `Chronological entry ${index + 1} · Received field ${record.originalIndex + 1}`;
+        const value = document.createElement("div");
+        value.className = "field-value";
+        const parsed = record.timestamp;
+        value.textContent =
+          `Raw date: ${record.dateText || "Unavailable"}\n` +
+          `Stated zone: ${parsed.zone || "Unavailable"}\n` +
+          `Normalized UTC: ${parsed.ok ? formatUtc(parsed.epochMs) : "Unavailable"}\n` +
+          `Parse status: ${parsed.ok ? "Parsed" : parsed.note}`;
+        row.append(heading, value);
+        table.appendChild(row);
+        if (parsed.ok) parsedCount++;
+        else skippedCount++;
+      });
+      timestampReview.appendChild(table);
+
+      if (chronological.length < 2) {
+        addFinding(timestampReview, "Not enough Received entries to compare timestamp ordering.", "neutral");
+      } else {
+        for (let index = 0; index < chronological.length - 1; index++) {
+          const older = chronological[index];
+          const newer = chronological[index + 1];
+          if (!older.timestamp.ok || !newer.timestamp.ok) {
+            addFinding(timestampReview,
+              `Timestamp comparison skipped between Received fields ${older.originalIndex + 1} and ${newer.originalIndex + 1}: one or both timestamps could not be reliably parsed with an explicit time zone.`,
+              "neutral");
+            continue;
+          }
+
+          const deltaMs = newer.timestamp.epochMs - older.timestamp.epochMs;
+          const deltaMinutes = deltaMs / 60000;
+          if (deltaMs < -CLOCK_SKEW_TOLERANCE_MS) {
+            anomalies++;
+            addFinding(timestampReview,
+              `Possible timestamp ordering anomaly between Received fields ${older.originalIndex + 1} and ${newer.originalIndex + 1}: the newer entry's stated time is ${Math.abs(deltaMinutes).toFixed(1)} minute(s) earlier than the older entry after UTC normalization. Clock skew, delayed processing, or forged text may explain this; investigate rather than treating it as proof.`,
+              "warning");
+          } else if (deltaMs < 0) {
+            addFinding(timestampReview,
+              `Small apparent clock reversal between Received fields ${older.originalIndex + 1} and ${newer.originalIndex + 1} (${Math.abs(deltaMinutes).toFixed(1)} minute(s)). It is within the ${CLOCK_SKEW_TOLERANCE_MS / 60000}-minute tolerance and is not flagged as a strong anomaly.`,
+              "neutral");
+          } else {
+            addFinding(timestampReview,
+              `Timestamp order is consistent between Received fields ${older.originalIndex + 1} and ${newer.originalIndex + 1}: ${deltaMinutes.toFixed(1)} minute(s) elapsed between stated timestamps.`,
+              "info");
+          }
+        }
+      }
+
+      addFinding(timestampReview,
+        `Timestamp summary: ${parsedCount} parsed, ${skippedCount} unavailable or unparseable, ${anomalies} possible ordering anomaly/anomalies. Comparison tolerance: ${CLOCK_SKEW_TOLERANCE_MS / 60000} minutes.`,
+        "neutral");
+      addFinding(timestampReview,
+        "Time-zone offsets are used to normalize stated times to UTC. An offset does not prove a server's physical location, and these pasted timestamps are not authenticated.",
+        "neutral");
     }
 
     // G. Render all parsed fields.
@@ -811,49 +489,27 @@ Authentication-Results: mx.example.org;
       identityReview.replaceChildren();
       receivedSummary.replaceChildren();
       relayPath.replaceChildren();
+      timestampReview.replaceChildren();
 
       const fieldNames = Object.keys(fields);
-
-      const count = fieldNames.reduce(
-        (total, name) => total + fields[name].length,
-        0
-      );
-
-      summary.textContent =
-        `Header fields found: ${count} · ` +
-        `Unique field names: ${fieldNames.length}`;
+      const count = fieldNames.reduce((total, name) => total + fields[name].length, 0);
+      summary.textContent = `Header fields found: ${count} · Unique field names: ${fieldNames.length}`;
 
       if (count === 0) {
-        addFinding(
-          fieldsContainer,
-          "No valid header fields were found. Check the pasted format.",
-          "warning"
-        );
-
+        addFinding(fieldsContainer, "No valid header fields were found. Check the pasted format.", "warning");
         results.style.display = "block";
         return;
       }
 
       renderIdentityReview(fields);
-      renderReceivedAnalysis(fields);
+      const chronological = renderReceivedAnalysis(fields);
+      renderTimestampReview(chronological);
 
       const preferredOrder = [
-        "from",
-        "reply-to",
-        "return-path",
-        "to",
-        "cc",
-        "subject",
-        "date",
-        "message-id",
-        "received",
-        "authentication-results",
-        "received-spf",
-        "dkim-signature",
-        "mime-version",
-        "content-type"
+        "from", "reply-to", "return-path", "to", "cc", "subject", "date",
+        "message-id", "received", "authentication-results", "received-spf",
+        "dkim-signature", "mime-version", "content-type"
       ];
-
       const orderedNames = [
         ...preferredOrder.filter(name => fields[name]),
         ...fieldNames.filter(name => !preferredOrder.includes(name))
@@ -863,21 +519,16 @@ Authentication-Results: mx.example.org;
         const combinedValues = fields[name]
           .map((value, index) => `[Value ${index + 1}]\n${value}`)
           .join("\n\n--------------------\n\n");
-
         addField(fieldsContainer, name, combinedValues);
       }
-
       results.style.display = "block";
     }
 
     // H. Analyze the current textarea contents.
     function analyzeHeaders() {
       const rawText = rawHeadersInput.value.trim();
-
       if (!rawText) {
-        status.textContent =
-          "Please paste email headers or load the test sample.";
-
+        status.textContent = "Please paste email headers or load a test sample.";
         results.style.display = "none";
         rawHeadersInput.focus();
         return;
@@ -886,44 +537,34 @@ Authentication-Results: mx.example.org;
       try {
         const fields = parseRawHeaders(rawText);
         renderResults(fields);
-
-        const count = Object.values(fields).reduce(
-          (total, values) => total + values.length,
-          0
-        );
-
-        status.textContent =
-          `Analysis complete. Parsed ${count} header field instances.`;
+        const count = Object.values(fields).reduce((total, values) => total + values.length, 0);
+        status.textContent = `Analysis complete. Parsed ${count} header field instances.`;
       } catch (error) {
         console.error("Mailshield header analysis error:", error);
-
-        status.textContent =
-          "Analysis failed. Open the browser console to inspect the error.";
+        status.textContent = "Analysis failed. Open the browser console to inspect the error.";
       }
     }
 
     analyzeBtn.addEventListener("click", analyzeHeaders);
-
     sampleBtn.addEventListener("click", () => {
       rawHeadersInput.value = sampleHeaders;
-
-      status.textContent =
-        "Test sample loaded. Click Analyze Headers to run the analysis.";
-
+      status.textContent = "Test sample loaded. Click Analyze Headers to run the analysis.";
       results.style.display = "none";
     });
-
+    timeSampleBtn.addEventListener("click", () => {
+      rawHeadersInput.value = timeZoneTestHeaders;
+      status.textContent = "Time-zone test loaded. Click Analyze Headers to compare timestamps normalized to UTC.";
+      results.style.display = "none";
+    });
     clearBtn.addEventListener("click", () => {
       rawHeadersInput.value = "";
-
       fieldsContainer.replaceChildren();
       identityReview.replaceChildren();
       receivedSummary.replaceChildren();
       relayPath.replaceChildren();
-
+      timestampReview.replaceChildren();
       summary.textContent = "";
       results.style.display = "none";
-
       status.textContent = "Cleared. Ready for another test.";
       rawHeadersInput.focus();
     });
