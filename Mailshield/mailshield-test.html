@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mailshield — Header Analyzer</title>
+  <title>Mailshield | Email Header Analyzer</title>
 
   <style>
     * {
@@ -259,6 +259,20 @@
       font-size: 12px;
       line-height: 1.7;
     }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 18px 10px;
+      }
+
+      .panel {
+        padding: 15px;
+      }
+
+      h1 {
+        font-size: 26px;
+      }
+    }
   </style>
 </head>
 
@@ -267,6 +281,7 @@
     <header>
       <div class="brand">Mailshield / Digital Forensics</div>
       <h1>Email Header Analyzer</h1>
+
       <p class="subtitle">
         Parse email headers, compare sender addresses, inspect repeated
         Received fields, and reconstruct an apparent mail-server relay path.
@@ -310,8 +325,9 @@
       <div id="identityReview"></div>
 
       <h3>Received Header Analysis</h3>
+
       <p class="muted">
-        Received fields are shown in their original header order.
+        Received fields are displayed in their original order.
         The apparent path is reconstructed in reverse field order,
         oldest first. This is a heuristic, not a verified network route.
       </p>
@@ -356,6 +372,9 @@
     const relayPath = document.getElementById("relayPath");
     const fieldsContainer = document.getElementById("fields");
 
+    /*
+     * Synthetic sample used for repeatable local testing.
+     */
     const sampleHeaders = `From: alerts@example.org
 Reply-To: support@example.net
 Return-Path: <bounce@example.org>
@@ -369,8 +388,8 @@ Authentication-Results: mx.example.org;
     dmarc=pass header.from=example.org`;
 
     /*
-     * STEP A: Parse the raw headers.
-     * Preserve repeated fields and unfold continuation lines.
+     * STEP A: Parse raw headers.
+     * Continuation lines are unfolded and repeated fields preserved.
      */
     function parseRawHeaders(rawText) {
       const fields = Object.create(null);
@@ -422,8 +441,8 @@ Authentication-Results: mx.example.org;
     }
 
     /*
-     * STEP B: Basic email address extraction.
-     * This is intentionally not a full RFC email parser.
+     * STEP B: Extract a basic email address.
+     * This is not a complete RFC email address parser.
      */
     function extractAddress(value) {
       if (!value) {
@@ -432,6 +451,7 @@ Authentication-Results: mx.example.org;
 
       const input = value.trim();
       const angleAddress = input.match(/<([^<>]+)>/);
+
       const candidate = angleAddress
         ? angleAddress[1].trim()
         : input;
@@ -461,7 +481,7 @@ Authentication-Results: mx.example.org;
 
     /*
      * Shared safe renderer.
-     * Untrusted header text is displayed as text, never HTML.
+     * Header content is displayed as text, never inserted as HTML.
      */
     function addField(container, name, value) {
       const card = document.createElement("div");
@@ -487,7 +507,7 @@ Authentication-Results: mx.example.org;
     }
 
     /*
-     * STEP C: Compare From, Reply-To and Return-Path domains.
+     * STEP C: Compare sender-related domains.
      */
     function renderIdentityReview(fields) {
       identityReview.replaceChildren();
@@ -576,16 +596,9 @@ Authentication-Results: mx.example.org;
     }
 
     /*
-     * STEP D: Parse each Received field.
-     *
-     * Typical simplified example:
-     * Received: from sender.example.org by relay.example.org;
-     *           Mon, 12 Oct 2026 10:00:00 +0000
-     *
-     * Real Received syntax is more complex. This parser deliberately
-     * extracts only simple from/by tokens for preliminary inspection.
+     * STEP D: Parse one Received field.
+     * Extract only simple from/by tokens for preliminary review.
      */
-    
     function parseReceivedHeader(value, originalIndex) {
       const fromMatch = value.match(
         /(?:^|\s)from\s+([^\s();]+)/i
@@ -644,16 +657,9 @@ Authentication-Results: mx.example.org;
         notes
       };
     }
-}
 
     /*
-     * STEP E: Build an apparent relay path.
-     *
-     * Received fields are normally prepended by receiving servers,
-     * so the first field is generally the newest. Reverse the field
-     * list to approximate oldest-to-newest traversal.
-     *
-     * This is a heuristic. Do not use it as proof of the real route.
+     * STEP E: Analyze Received fields and reconstruct an apparent path.
      */
     function renderReceivedAnalysis(fields) {
       receivedSummary.replaceChildren();
@@ -684,13 +690,13 @@ Authentication-Results: mx.example.org;
       addFinding(
         receivedSummary,
         `Received headers found: ${parsed.length}. ` +
-        `They are displayed below in their original order, usually newest first.`,
+        "They are displayed in their original order, usually newest first.",
         "info"
       );
 
       /*
-       * Display the apparent path oldest to newest.
-       * Only use the extracted from/by tokens; do not claim verification.
+       * Reverse the header list to estimate oldest-to-newest order.
+       * This is a heuristic, not verification of actual delivery.
        */
       const chronological = [...parsed].reverse();
       const pathNodes = [];
@@ -717,7 +723,6 @@ Authentication-Results: mx.example.org;
 
       for (const record of chronological) {
         pushNode(record.fromHost, record.originalIndex);
-
         pushNode(record.byHost, record.originalIndex);
       }
 
@@ -731,7 +736,7 @@ Authentication-Results: mx.example.org;
       if (pathNodes.length === 0) {
         addFinding(
           relayPath,
-          "The Received fields were found, but no simple relay path could be extracted. Inspect the original values below.",
+          "Received fields were found, but no simple relay path could be extracted. Inspect the original values below.",
           "warning"
         );
       } else {
@@ -777,53 +782,55 @@ Authentication-Results: mx.example.org;
       );
 
       /*
-       * Review notes for individual Received fields.
+       * STEP F: Group review notes.
+       * One warning per Received field instead of several warnings.
        */
       const reviewTitle = document.createElement("h3");
-      reviewTitle.textContent =
-        "Received Header Review Notes";
+      reviewTitle.textContent = "Received Header Review Notes";
 
       relayPath.appendChild(reviewTitle);
 
-      
-        for (const record of parsed) {
-          const label = `Received field ${record.originalIndex + 1}`;
+      for (const record of parsed) {
+        const label = `Received field ${record.originalIndex + 1}`;
 
-          if (record.notes.length === 0) {
-            addFinding(
-              relayPath,
-              `${label}: Basic host extraction succeeded. ` +
-              `This does not verify that the hosts are genuine.`,
-              "info"
-            );
-
-            continue;
-          }
-
-          const groupedMessage =
-            `${label}: ${record.notes.join(" ")}`;
-
+        if (record.notes.length === 0) {
           addFinding(
             relayPath,
-            groupedMessage,
-            "warning"
+            `${label}: Basic host extraction succeeded. ` +
+            "This does not verify that the hosts are genuine.",
+            "info"
           );
+
+          continue;
         }
 
+        const groupedMessage =
+          `${label}: ${record.notes.join(" ")}`;
+
+        addFinding(
+          relayPath,
+          groupedMessage,
+          "warning"
+        );
+      }
 
       /*
-       * Compare adjacent extracted server relationships.
-       * This is only a heuristic and may be inconclusive for
-       * gateways, relays, and unusual mail infrastructure.
+       * STEP G: Compare adjacent extracted relay relationships.
+       * A mismatch is only a review signal.
        */
-      for (let index = 0; index < chronological.length - 1; index++) {
+      for (
+        let index = 0;
+        index < chronological.length - 1;
+        index++
+      ) {
         const older = chronological[index];
         const newer = chronological[index + 1];
 
         if (
           older.byHost &&
           newer.fromHost &&
-          older.byHost.toLowerCase() !== newer.fromHost.toLowerCase()
+          older.byHost.toLowerCase() !==
+            newer.fromHost.toLowerCase()
         ) {
           addFinding(
             relayPath,
@@ -839,7 +846,7 @@ Authentication-Results: mx.example.org;
     }
 
     /*
-     * STEP F: Render all parsed fields, preserving repeated values.
+     * STEP H: Render all parsed headers.
      */
     function renderResults(fields) {
       fieldsContainer.replaceChildren();
@@ -910,7 +917,7 @@ Authentication-Results: mx.example.org;
     }
 
     /*
-     * STEP G: Analyze the textarea contents.
+     * STEP I: Run analysis.
      */
     function analyzeHeaders() {
       const rawText = rawHeadersInput.value.trim();
@@ -943,10 +950,14 @@ Authentication-Results: mx.example.org;
       }
     }
 
+    /*
+     * Buttons
+     */
     analyzeBtn.addEventListener("click", analyzeHeaders);
 
     sampleBtn.addEventListener("click", () => {
       rawHeadersInput.value = sampleHeaders;
+
       status.textContent =
         "Test sample loaded. Click Analyze Headers to run the analysis.";
 
@@ -968,9 +979,8 @@ Authentication-Results: mx.example.org;
       rawHeadersInput.focus();
     });
 
-    // Load a multi-Received test sample when the page opens.
+    // Load the complete test sample on first opening.
     rawHeadersInput.value = sampleHeaders;
   </script>
 </body>
 </html>
--
