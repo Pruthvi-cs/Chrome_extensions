@@ -585,6 +585,7 @@ Authentication-Results: mx.example.org;
      * Real Received syntax is more complex. This parser deliberately
      * extracts only simple from/by tokens for preliminary inspection.
      */
+    
     function parseReceivedHeader(value, originalIndex) {
       const fromMatch = value.match(
         /(?:^|\s)from\s+([^\s();]+)/i
@@ -595,8 +596,10 @@ Authentication-Results: mx.example.org;
       );
 
       const dateParts = value.split(";");
+
       const hasDateSection =
-        dateParts.length > 1 && dateParts.slice(1).join(";").trim() !== "";
+        dateParts.length > 1 &&
+        dateParts.slice(1).join(";").trim() !== "";
 
       const fromHost = fromMatch
         ? fromMatch[1].replace(/[.,]+$/, "")
@@ -609,15 +612,11 @@ Authentication-Results: mx.example.org;
       const notes = [];
 
       if (!fromHost) {
-        notes.push(
-          "Could not extract a simple 'from' host. The syntax may be complex."
-        );
+        notes.push("Missing or unrecognized 'from' host.");
       }
 
       if (!byHost) {
-        notes.push(
-          "Could not extract a simple 'by' host. The syntax may be complex."
-        );
+        notes.push("Missing or unrecognized 'by' host.");
       }
 
       if (
@@ -626,13 +625,13 @@ Authentication-Results: mx.example.org;
         fromHost.toLowerCase() === byHost.toLowerCase()
       ) {
         notes.push(
-          "The extracted from and by hosts are identical; review the context."
+          "The extracted 'from' and 'by' hosts are identical; review the context."
         );
       }
 
       if (!hasDateSection) {
         notes.push(
-          "No semicolon-separated date section was detected. This alone is not proof of a problem."
+          "No semicolon-separated date section was detected."
         );
       }
 
@@ -645,6 +644,7 @@ Authentication-Results: mx.example.org;
         notes
       };
     }
+}
 
     /*
      * STEP E: Build an apparent relay path.
@@ -968,3 +968,4 @@ Authentication-Results: mx.example.org;
   </script>
 </body>
 </html>
+-
