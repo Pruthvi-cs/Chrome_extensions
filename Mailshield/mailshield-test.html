@@ -7,9 +7,7 @@
   <title>Mailshield | Email Header Analyzer</title>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -26,9 +24,7 @@
       margin: auto;
     }
 
-    header {
-      margin-bottom: 28px;
-    }
+    header { margin-bottom: 28px; }
 
     .brand {
       color: #60a5fa;
@@ -38,23 +34,16 @@
       text-transform: uppercase;
     }
 
-    h1 {
-      margin: 10px 0;
-      font-size: 32px;
-    }
+    h1 { margin: 10px 0; font-size: 32px; }
+    h2 { margin-top: 0; }
+    h3 { margin-top: 24px; }
 
-    h2 {
-      margin-top: 0;
-    }
-
-    h3 {
-      margin-top: 24px;
-    }
-
-    .subtitle {
+    .subtitle, .muted {
       color: #9ca3af;
       line-height: 1.7;
     }
+
+    .muted { font-size: 13px; }
 
     .panel {
       padding: 22px;
@@ -85,9 +74,7 @@
       line-height: 1.7;
     }
 
-    textarea:focus {
-      border-color: #60a5fa;
-    }
+    textarea:focus { border-color: #60a5fa; }
 
     .actions {
       display: flex;
@@ -104,24 +91,15 @@
       font-weight: bold;
     }
 
-    button:hover {
-      opacity: 0.88;
-    }
+    button:hover { opacity: 0.88; }
 
     button:focus-visible {
       outline: 2px solid #93c5fd;
       outline-offset: 3px;
     }
 
-    .primary {
-      background: #2563eb;
-      color: white;
-    }
-
-    .secondary {
-      background: #273449;
-      color: #e5e7eb;
-    }
+    .primary { background: #2563eb; color: white; }
+    .secondary { background: #273449; color: #e5e7eb; }
 
     #status {
       margin-top: 12px;
@@ -130,9 +108,7 @@
       line-height: 1.6;
     }
 
-    #results {
-      display: none;
-    }
+    #results { display: none; }
 
     .summary {
       margin-bottom: 18px;
@@ -218,10 +194,7 @@
       font-weight: bold;
     }
 
-    .step-content {
-      min-width: 0;
-      flex: 1;
-    }
+    .step-content { min-width: 0; flex: 1; }
 
     .step-content strong {
       display: block;
@@ -247,12 +220,6 @@
       line-height: 1.8;
     }
 
-    .muted {
-      color: #9ca3af;
-      font-size: 13px;
-      line-height: 1.7;
-    }
-
     footer {
       padding: 8px 0;
       color: #6b7280;
@@ -261,17 +228,9 @@
     }
 
     @media (max-width: 600px) {
-      body {
-        padding: 18px 10px;
-      }
-
-      .panel {
-        padding: 15px;
-      }
-
-      h1 {
-        font-size: 26px;
-      }
+      body { padding: 18px 10px; }
+      .panel { padding: 15px; }
+      h1 { font-size: 26px; }
     }
   </style>
 </head>
@@ -281,7 +240,6 @@
     <header>
       <div class="brand">Mailshield / Digital Forensics</div>
       <h1>Email Header Analyzer</h1>
-
       <p class="subtitle">
         Parse email headers, compare sender addresses, inspect repeated
         Received fields, and reconstruct an apparent mail-server relay path.
@@ -301,11 +259,9 @@
         <button class="primary" id="analyzeBtn" type="button">
           Analyze Headers
         </button>
-
         <button class="secondary" id="sampleBtn" type="button">
           Load Test Sample
         </button>
-
         <button class="secondary" id="clearBtn" type="button">
           Clear
         </button>
@@ -318,20 +274,17 @@
 
     <section class="panel" id="results">
       <h2>Analysis Results</h2>
-
       <div class="summary" id="summary"></div>
 
       <h3>Sender Identity Review</h3>
       <div id="identityReview"></div>
 
       <h3>Received Header Analysis</h3>
-
       <p class="muted">
         Received fields are displayed in their original order.
         The apparent path is reconstructed in reverse field order,
         oldest first. This is a heuristic, not a verified network route.
       </p>
-
       <div id="receivedSummary"></div>
       <div id="relayPath"></div>
 
@@ -372,9 +325,6 @@
     const relayPath = document.getElementById("relayPath");
     const fieldsContainer = document.getElementById("fields");
 
-    /*
-     * Synthetic sample used for repeatable local testing.
-     */
     const sampleHeaders = `From: alerts@example.org
 Reply-To: support@example.net
 Return-Path: <bounce@example.org>
@@ -387,10 +337,7 @@ Authentication-Results: mx.example.org;
     dkim=pass header.d=example.org;
     dmarc=pass header.from=example.org`;
 
-    /*
-     * STEP A: Parse raw headers.
-     * Continuation lines are unfolded and repeated fields preserved.
-     */
+    // A. Parse headers, unfold continuation lines, preserve duplicates.
     function parseRawHeaders(rawText) {
       const fields = Object.create(null);
 
@@ -399,9 +346,8 @@ Authentication-Results: mx.example.org;
         .replace(/\r/g, "\n");
 
       const unfoldedLines = [];
-      const lines = normalized.split("\n");
 
-      for (const line of lines) {
+      for (const line of normalized.split("\n")) {
         if (/^[ \t]/.test(line) && unfoldedLines.length > 0) {
           unfoldedLines[unfoldedLines.length - 1] +=
             " " + line.trim();
@@ -411,47 +357,31 @@ Authentication-Results: mx.example.org;
       }
 
       for (const line of unfoldedLines) {
-        if (!line.trim()) {
-          continue;
-        }
+        if (!line.trim()) continue;
 
         const separator = line.indexOf(":");
-
-        if (separator <= 0) {
-          continue;
-        }
+        if (separator <= 0) continue;
 
         const name = line.slice(0, separator).trim();
         const value = line.slice(separator + 1).trim();
 
-        if (!/^[!-9;-~]+$/.test(name)) {
-          continue;
-        }
+        if (!/^[!-9;-~]+$/.test(name)) continue;
 
         const key = name.toLowerCase();
 
-        if (!fields[key]) {
-          fields[key] = [];
-        }
-
+        if (!fields[key]) fields[key] = [];
         fields[key].push(value);
       }
 
       return fields;
     }
 
-    /*
-     * STEP B: Extract a basic email address.
-     * This is not a complete RFC email address parser.
-     */
+    // B. Lightweight email address extraction.
     function extractAddress(value) {
-      if (!value) {
-        return "";
-      }
+      if (!value) return "";
 
       const input = value.trim();
       const angleAddress = input.match(/<([^<>]+)>/);
-
       const candidate = angleAddress
         ? angleAddress[1].trim()
         : input;
@@ -461,28 +391,19 @@ Authentication-Results: mx.example.org;
       }
 
       const parts = candidate.split("@");
-
-      if (parts.length !== 2 || !parts[1]) {
-        return "";
-      }
+      if (parts.length !== 2 || !parts[1]) return "";
 
       return candidate.toLowerCase();
     }
 
     function getDomain(address) {
       const atIndex = address.lastIndexOf("@");
-
-      if (atIndex < 0) {
-        return "";
-      }
-
-      return address.slice(atIndex + 1).toLowerCase();
+      return atIndex < 0
+        ? ""
+        : address.slice(atIndex + 1).toLowerCase();
     }
 
-    /*
-     * Shared safe renderer.
-     * Header content is displayed as text, never inserted as HTML.
-     */
+    // Safe rendering: never interpret untrusted header text as HTML.
     function addField(container, name, value) {
       const card = document.createElement("div");
       card.className = "field";
@@ -506,9 +427,7 @@ Authentication-Results: mx.example.org;
       container.appendChild(item);
     }
 
-    /*
-     * STEP C: Compare sender-related domains.
-     */
+    // C. Compare sender-related domains.
     function renderIdentityReview(fields) {
       identityReview.replaceChildren();
 
@@ -535,7 +454,7 @@ Authentication-Results: mx.example.org;
         findings.push(
           `Reply-To domain differs from From domain: ` +
           `${fromAddress} vs ${replyAddress}. Review the context; ` +
-          `this difference can be legitimate.`
+          "this difference can be legitimate."
         );
       }
 
@@ -557,8 +476,7 @@ Authentication-Results: mx.example.org;
       ) {
         findings.push(
           `Return-Path domain differs from From domain: ` +
-          `${fromAddress} vs ${returnPathAddress}. This can be ` +
-          `legitimate; review the context.`
+          `${fromAddress} vs ${returnPathAddress}. This can be legitimate.`
         );
       }
 
@@ -595,10 +513,7 @@ Authentication-Results: mx.example.org;
       );
     }
 
-    /*
-     * STEP D: Parse one Received field.
-     * Extract only simple from/by tokens for preliminary review.
-     */
+    // D. Extract simple host tokens from a Received field.
     function parseReceivedHeader(value, originalIndex) {
       const fromMatch = value.match(
         /(?:^|\s)from\s+([^\s();]+)/i
@@ -609,7 +524,6 @@ Authentication-Results: mx.example.org;
       );
 
       const dateParts = value.split(";");
-
       const hasDateSection =
         dateParts.length > 1 &&
         dateParts.slice(1).join(";").trim() !== "";
@@ -643,9 +557,7 @@ Authentication-Results: mx.example.org;
       }
 
       if (!hasDateSection) {
-        notes.push(
-          "No semicolon-separated date section was detected."
-        );
+        notes.push("No semicolon-separated date section was detected.");
       }
 
       return {
@@ -658,9 +570,7 @@ Authentication-Results: mx.example.org;
       };
     }
 
-    /*
-     * STEP E: Analyze Received fields and reconstruct an apparent path.
-     */
+    // E. Render the apparent path and Received review.
     function renderReceivedAnalysis(fields) {
       receivedSummary.replaceChildren();
       relayPath.replaceChildren();
@@ -694,17 +604,12 @@ Authentication-Results: mx.example.org;
         "info"
       );
 
-      /*
-       * Reverse the header list to estimate oldest-to-newest order.
-       * This is a heuristic, not verification of actual delivery.
-       */
+      // Reverse header order as a heuristic: oldest to newest.
       const chronological = [...parsed].reverse();
       const pathNodes = [];
 
-      function pushNode(host, sourceIndex) {
-        if (!host) {
-          return;
-        }
+      function pushNode(host) {
+        if (!host) return;
 
         const previous = pathNodes[pathNodes.length - 1];
 
@@ -715,15 +620,12 @@ Authentication-Results: mx.example.org;
           return;
         }
 
-        pathNodes.push({
-          host,
-          sourceIndex
-        });
+        pathNodes.push({ host });
       }
 
       for (const record of chronological) {
-        pushNode(record.fromHost, record.originalIndex);
-        pushNode(record.byHost, record.originalIndex);
+        pushNode(record.fromHost);
+        pushNode(record.byHost);
       }
 
       const pathTitle = document.createElement("div");
@@ -740,9 +642,7 @@ Authentication-Results: mx.example.org;
           "warning"
         );
       } else {
-        for (let index = 0; index < pathNodes.length; index++) {
-          const node = pathNodes[index];
-
+        pathNodes.forEach((node, index) => {
           const step = document.createElement("div");
           step.className = "step";
 
@@ -772,22 +672,18 @@ Authentication-Results: mx.example.org;
           content.append(title, description);
           step.append(number, content);
           relayPath.appendChild(step);
-        }
+        });
       }
 
       addFinding(
         relayPath,
-        "Interpretation caution: this path is inferred from simple host tokens. Received fields can be forged before a trusted server adds its own header, and complex syntax may not be fully parsed.",
+        "This path is inferred from simple host tokens. It does not verify that the hosts are genuine or that the message followed this route.",
         "neutral"
       );
 
-      /*
-       * STEP F: Group review notes.
-       * One warning per Received field instead of several warnings.
-       */
+      // Group all review notes into one message per Received field.
       const reviewTitle = document.createElement("h3");
       reviewTitle.textContent = "Received Header Review Notes";
-
       relayPath.appendChild(reviewTitle);
 
       for (const record of parsed) {
@@ -800,54 +696,116 @@ Authentication-Results: mx.example.org;
             "This does not verify that the hosts are genuine.",
             "info"
           );
-
-          continue;
-        }
-
-        const groupedMessage =
-          `${label}: ${record.notes.join(" ")}`;
-
-        addFinding(
-          relayPath,
-          groupedMessage,
-          "warning"
-        );
-      }
-
-      /*
-       * STEP G: Compare adjacent extracted relay relationships.
-       * A mismatch is only a review signal.
-       */
-      for (
-        let index = 0;
-        index < chronological.length - 1;
-        index++
-      ) {
-        const older = chronological[index];
-        const newer = chronological[index + 1];
-
-        if (
-          older.byHost &&
-          newer.fromHost &&
-          older.byHost.toLowerCase() !==
-            newer.fromHost.toLowerCase()
-        ) {
+        } else {
           addFinding(
             relayPath,
-            `Review possible relay discontinuity between chronological ` +
-            `Received fields ${older.originalIndex + 1} and ` +
-            `${newer.originalIndex + 1}: older 'by' host ` +
-            `"${older.byHost}" differs from newer 'from' host ` +
-            `"${newer.fromHost}". This can be legitimate and is not proof of spoofing.`,
+            `${label}: ${record.notes.join(" ")}`,
             "warning"
           );
         }
       }
+
+      /*
+       * F. Improved relay continuity checks.
+       *
+       * Compare only when the older Received field's "by" host and
+       * the newer Received field's "from" host are both available.
+       *
+       * If either host is missing, report that the comparison was
+       * skipped. Do not label incomplete data a relay discontinuity.
+       */
+      let comparisonsMade = 0;
+      let comparisonsSkipped = 0;
+      let mismatchesFound = 0;
+
+      const continuityTitle = document.createElement("h3");
+      continuityTitle.textContent = "Relay Continuity Review";
+      relayPath.appendChild(continuityTitle);
+
+      if (chronological.length < 2) {
+        addFinding(
+          relayPath,
+          "Not enough Received entries to compare adjacent relay relationships.",
+          "neutral"
+        );
+      } else {
+        for (
+          let index = 0;
+          index < chronological.length - 1;
+          index++
+        ) {
+          const older = chronological[index];
+          const newer = chronological[index + 1];
+
+          const olderBy = older.byHost;
+          const newerFrom = newer.fromHost;
+
+          if (!olderBy || !newerFrom) {
+            comparisonsSkipped++;
+
+            const missing = [];
+
+            if (!olderBy) {
+              missing.push(
+                `the older entry's 'by' host is unavailable`
+              );
+            }
+
+            if (!newerFrom) {
+              missing.push(
+                `the newer entry's 'from' host is unavailable`
+              );
+            }
+
+            addFinding(
+              relayPath,
+              `Continuity comparison skipped between Received fields ` +
+              `${older.originalIndex + 1} and ${newer.originalIndex + 1}: ` +
+              `${missing.join(" and ")}. The relationship cannot be assessed from these extracted values.`,
+              "neutral"
+            );
+
+            continue;
+          }
+
+          comparisonsMade++;
+
+          if (
+            olderBy.toLowerCase() !== newerFrom.toLowerCase()
+          ) {
+            mismatchesFound++;
+
+            addFinding(
+              relayPath,
+              `Possible relay discontinuity between Received fields ` +
+              `${older.originalIndex + 1} and ${newer.originalIndex + 1}: ` +
+              `older 'by' host "${olderBy}" differs from newer ` +
+              `'from' host "${newerFrom}". This can be legitimate and ` +
+              "is not proof of spoofing.",
+              "warning"
+            );
+          } else {
+            addFinding(
+              relayPath,
+              `Received fields ${older.originalIndex + 1} and ` +
+              `${newer.originalIndex + 1}: extracted relay hosts line up ` +
+              `("${olderBy}"). This does not authenticate the route.`,
+              "info"
+            );
+          }
+        }
+
+        addFinding(
+          relayPath,
+          `Continuity summary: ${comparisonsMade} comparison(s) made, ` +
+          `${comparisonsSkipped} skipped because host information was ` +
+          `incomplete, ${mismatchesFound} possible mismatch(es) found.`,
+          "neutral"
+        );
+      }
     }
 
-    /*
-     * STEP H: Render all parsed headers.
-     */
+    // G. Render all parsed fields.
     function renderResults(fields) {
       fieldsContainer.replaceChildren();
       identityReview.replaceChildren();
@@ -902,12 +860,8 @@ Authentication-Results: mx.example.org;
       ];
 
       for (const name of orderedNames) {
-        const values = fields[name];
-
-        const combinedValues = values
-          .map((value, index) =>
-            `[Value ${index + 1}]\n${value}`
-          )
+        const combinedValues = fields[name]
+          .map((value, index) => `[Value ${index + 1}]\n${value}`)
           .join("\n\n--------------------\n\n");
 
         addField(fieldsContainer, name, combinedValues);
@@ -916,9 +870,7 @@ Authentication-Results: mx.example.org;
       results.style.display = "block";
     }
 
-    /*
-     * STEP I: Run analysis.
-     */
+    // H. Analyze the current textarea contents.
     function analyzeHeaders() {
       const rawText = rawHeadersInput.value.trim();
 
@@ -950,9 +902,6 @@ Authentication-Results: mx.example.org;
       }
     }
 
-    /*
-     * Buttons
-     */
     analyzeBtn.addEventListener("click", analyzeHeaders);
 
     sampleBtn.addEventListener("click", () => {
@@ -979,7 +928,7 @@ Authentication-Results: mx.example.org;
       rawHeadersInput.focus();
     });
 
-    // Load the complete test sample on first opening.
+    // Load the complete synthetic sample when the page opens.
     rawHeadersInput.value = sampleHeaders;
   </script>
 </body>
