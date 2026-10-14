@@ -785,26 +785,31 @@ Authentication-Results: mx.example.org;
 
       relayPath.appendChild(reviewTitle);
 
-      for (const record of parsed) {
-        const label = `Received field ${record.originalIndex + 1}`;
+      
+        for (const record of parsed) {
+          const label = `Received field ${record.originalIndex + 1}`;
 
-        if (record.notes.length === 0) {
-          addFinding(
-            relayPath,
-            `${label}: Simple from/by hosts were extracted. ` +
-            `This does not verify that the hosts are genuine.`,
-            "info"
-          );
-        } else {
-          for (const note of record.notes) {
+          if (record.notes.length === 0) {
             addFinding(
               relayPath,
-              `${label}: ${note}`,
-              "warning"
+              `${label}: Basic host extraction succeeded. ` +
+              `This does not verify that the hosts are genuine.`,
+              "info"
             );
+
+            continue;
           }
+
+          const groupedMessage =
+            `${label}: ${record.notes.join(" ")}`;
+
+          addFinding(
+            relayPath,
+            groupedMessage,
+            "warning"
+          );
         }
-      }
+
 
       /*
        * Compare adjacent extracted server relationships.
