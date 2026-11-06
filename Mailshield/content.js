@@ -215,13 +215,14 @@
         const messageContainer =
             bodyElement.closest(".adn") ||
             bodyElement.parentElement;
-console.log("MAILSHIELD MESSAGE CONTAINER:", messageContainer);
-console.log("MAILSHIELD MESSAGE ATTRIBUTES:", {
-    id: messageContainer?.id,
-    threadId: messageContainer?.getAttribute("data-legacy-thread-id"),
-    messageId: messageContainer?.getAttribute("data-legacy-message-id"),
-    messagePermId: messageContainer?.getAttribute("data-message-id")
-});
+        console.log("MAILSHIELD MESSAGE CONTAINER:", messageContainer);
+        console.log("MAILSHIELD MESSAGE ATTRIBUTES:", {
+            id: messageContainer?.id,
+            threadId: messageContainer?.getAttribute("data-legacy-thread-id"),
+            messageId: messageContainer?.getAttribute("data-legacy-message-id"),
+            messagePermId: messageContainer?.getAttribute("data-message-id")
+        });
+        
         const senderElement =
             messageContainer?.querySelector(".gD");
 
