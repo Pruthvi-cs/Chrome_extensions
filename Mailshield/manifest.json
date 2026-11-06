@@ -16,10 +16,49 @@
         "content.js"
       ],
       "run_at": "document_idle"
+{
+  "manifest_version": 3,
+  "name": "Mailshield",
+  "version": "1.0.0",
+  "description": "Email threat detection and forensic intelligence.",
+
+  "permissions": [
+    "identity"
+  ],
+
+  "host_permissions": [
+    "https://mail.google.com/*",
+    "https://gmail.googleapis.com/*"
+  ],
+
+  "oauth2": {
+    "client_id": "811119827924-b9jv5ppr44c60t6fp4tgvb4nl6ufvm5r.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/gmail.metadata"
+    ]
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mail.google.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+
+  "action": {
+    "default_title": "Mailshield"
+  }
+}
+
     }
   ],
   "action": {
     "default_title": "Mailshield"
   }
-  
+
 }
