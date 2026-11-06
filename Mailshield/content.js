@@ -204,7 +204,7 @@
     }
 
     // ============================================================
-    // 2. EXTRACT INFORMATION FROM THE OPEN GMAIL MESSAGE
+    // 2. EXTRACT INFORMATION FROM THE OPEN GMAIL MESSAGE vf
     // ============================================================
 
     function extractEmail(bodyElement) {
@@ -222,7 +222,7 @@
             messageId: messageContainer?.getAttribute("data-legacy-message-id"),
             messagePermId: messageContainer?.getAttribute("data-message-id")
         });
-        
+
         const senderElement =
             messageContainer?.querySelector(".gD");
 
