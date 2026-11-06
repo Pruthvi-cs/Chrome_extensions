@@ -204,7 +204,7 @@
     }
 
     // ============================================================
-    // 2. EXTRACT INFORMATION FROM THE OPEN GMAIL MESSAGE vfljlkjjjj
+    // 2. EXTRACT INFORMATION FROM THE OPEN GMAIL MESSAGE 
     // ============================================================
 
     function extractEmail(bodyElement) {
