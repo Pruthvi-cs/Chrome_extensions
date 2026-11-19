@@ -19,4 +19,4 @@ Stop the watcher with `Ctrl+C` when local monitoring is no longer needed.
 
 Reload the unpacked extension from `chrome://extensions` after source changes.
 
-The popup setting is stored locally in Chrome.
+The popup setting  is stored locally in Chrome.
