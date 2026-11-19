@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "YouTube Ad Blocker",
-  "version": "1.0.0",
-  "description": "Removes common YouTube video and page advertisements.",
+  "version": "2.0.0",
+  "description": "Blocks common YouTube advertisements and lets you pause blocking.",
   "permissions": [
     "storage",
     "declarativeNetRequest"
@@ -11,7 +11,8 @@
     "*://*.youtube.com/*",
     "*://*.googlevideo.com/*",
     "*://*.doubleclick.net/*",
-    "*://*.googleadservices.com/*"
+    "*://*.googleadservices.com/*",
+    "*://*.googlesyndication.com/*"
   ],
   "action": {
     "default_popup": "popup.html"

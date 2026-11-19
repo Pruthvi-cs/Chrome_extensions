@@ -2,6 +2,7 @@
 
 This Manifest V3 extension removes common YouTube ad elements, skips video ads
 when a skip control is available, and blocks common advertising requests.
+Version 2 adds a cleaner popup and an additional advertising domain rule.
 
 ## Load in Chrome
 

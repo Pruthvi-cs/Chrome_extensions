@@ -12,6 +12,7 @@ const AD_SELECTORS = [
 ];
 
 let enabled = true;
+let observer;
 
 function removeAds() {
   if (!enabled) {
@@ -24,7 +25,7 @@ function removeAds() {
 
   const video = document.querySelector("video");
   const player = document.querySelector(".html5-video-player");
-  if (video && player?.classList.contains("ad-showing")) {
+  if (video && player && player.classList.contains("ad-showing")) {
     const skipButton = document.querySelector(".ytp-ad-skip-button, .ytp-ad-skip-button-modern");
     skipButton?.click();
 
@@ -46,6 +47,16 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   }
 });
 
-const observer = new MutationObserver(removeAds);
-observer.observe(document.documentElement, { childList: true, subtree: true });
+function startWatching() {
+  if (!document.documentElement) {
+    requestAnimationFrame(startWatching);
+    return;
+  }
+
+  observer = new MutationObserver(removeAds);
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+  removeAds();
+}
+
+startWatching();
 setInterval(removeAds, 1000);

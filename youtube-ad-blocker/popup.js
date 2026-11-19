@@ -7,10 +7,13 @@ function renderStatus(enabled) {
     : "Blocking is disabled.";
 }
 
-chrome.storage.local.get({ enabled: true }).then(({ enabled }) => {
+async function loadSettings() {
+  const { enabled } = await chrome.storage.local.get({ enabled: true });
   enabledInput.checked = enabled;
   renderStatus(enabled);
-});
+}
+
+loadSettings();
 
 enabledInput.addEventListener("change", async () => {
   const enabled = enabledInput.checked;
