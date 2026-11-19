@@ -11,10 +11,27 @@ const AD_SELECTORS = [
   "ytd-statement-banner-renderer"
 ];
 
-let enabled = true;
+let blockingEnabled = true;
 
-function removeAds() {
-  if (!enabled) {
+function skipVideoAd() {
+  const player = document.querySelector(".html5-video-player");
+  const video = document.querySelector("video");
+
+  if (!player?.classList.contains("ad-showing") || !video) {
+    return;
+  }
+
+  document
+    .querySelector(".ytp-ad-skip-button, .ytp-ad-skip-button-modern")
+    ?.click();
+
+  if (Number.isFinite(video.duration) && video.duration > 0) {
+    video.currentTime = video.duration;
+  }
+}
+
+function removePageAds() {
+  if (!blockingEnabled) {
     return;
   }
 
@@ -22,30 +39,28 @@ function removeAds() {
     element.remove();
   });
 
-  const video = document.querySelector("video");
-  const player = document.querySelector(".html5-video-player");
-  if (video && player?.classList.contains("ad-showing")) {
-    const skipButton = document.querySelector(".ytp-ad-skip-button, .ytp-ad-skip-button-modern");
-    skipButton?.click();
-
-    if (Number.isFinite(video.duration) && video.duration > 0) {
-      video.currentTime = video.duration;
-    }
-  }
+  skipVideoAd();
 }
 
-chrome.storage.local.get({ enabled: true }).then(({ enabled: storedEnabled }) => {
-  enabled = storedEnabled;
-  removeAds();
-});
+chrome.storage.local
+  .get({ enabled: true })
+  .then(({ enabled }) => {
+    blockingEnabled = enabled;
+    removePageAds();
+  });
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
-  if (areaName === "local" && changes.enabled) {
-    enabled = changes.enabled.newValue;
-    removeAds();
+  if (areaName !== "local" || !changes.enabled) {
+    return;
   }
+
+  blockingEnabled = changes.enabled.newValue;
+  removePageAds();
 });
 
-const observer = new MutationObserver(removeAds);
-observer.observe(document.documentElement, { childList: true, subtree: true });
-setInterval(removeAds, 1000);
+new MutationObserver(removePageAds).observe(document.documentElement, {
+  childList: true,
+  subtree: true
+});
+
+setInterval(removePageAds, 1000);

@@ -1,22 +1,23 @@
 # YouTube Ad Blocker
 
-This Manifest V3 extension removes common YouTube ad elements, skips video ads
-when a skip control is available, and blocks common advertising requests.
+A Manifest V3 Chrome extension that blocks common YouTube page ads and attempts
+to skip video ads when YouTube exposes a skip control.
 
-## Load in Chrome
+## Install
 
 1. Open `chrome://extensions`.
 2. Enable **Developer mode**.
-3. Select **Load unpacked**.
-4. Choose this `youtube-ad-blocker` folder.
+3. Click **Load unpacked**.
+4. Select this `youtube-ad-blocker` folder.
 
-Use the extension popup to enable or disable blocking. YouTube changes its
-player frequently, so selectors and request rules may need maintenance.
+After installing, open the extension popup to enable or disable blocking. The
+setting is stored locally in Chrome.
 
-The extension folder is monitored by the local auto-committer watcher.
+## Development
 
-Stop the watcher with `Ctrl+C` when local monitoring is no longer needed.
+YouTube changes its player and ad delivery frequently. Update `content.js` and
+`rules.json` when selectors or ad request patterns change, then click
+**Reload** for the unpacked extension in `chrome://extensions`.
 
-Reload the unpacked extension from `chrome://extensions` after source changes.
-
-The popup setting  is stored locally in Chrome.
+The local watcher monitors `R:\learn\extention`, automatically commits changes,
+and pushes those commits to the configured Git remote.

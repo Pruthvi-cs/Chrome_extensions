@@ -3,7 +3,7 @@
 }
 
 body {
-  width: 240px;
+  width: 250px;
   margin: 0;
   padding: 18px;
   color: #202124;
@@ -11,14 +11,15 @@ body {
 }
 
 h1 {
-  margin: 0 0 16px;
+  margin: 0 0 18px;
   font-size: 17px;
 }
 
-.toggle-row {
+.setting {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   font-weight: 600;
 }
 
