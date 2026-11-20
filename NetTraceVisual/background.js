@@ -67,7 +67,7 @@ chrome.webRequest.onResponseStarted.addListener(
 
 async function geolocate(ip) {
   if (!ip || /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|127\.|::1)/.test(ip)) {
-    return { ip, city: "Private network", country: "", lat: null, lon: null, asn: "" };
+    return { ip, city: "Private network", region: "", country: "", lat: null, lon: null, asn: "", org: "Private network" };
   }
   try {
     const response = await fetch(`https://ipapi.co/${encodeURIComponent(ip)}/json/`);
@@ -76,13 +76,15 @@ async function geolocate(ip) {
     return {
       ip,
       city: value.city || "Unknown",
+      region: value.region || "",
       country: value.country_name || value.country || "",
       lat: value.latitude ?? null,
       lon: value.longitude ?? null,
-      asn: value.asn || value.org || ""
+      asn: value.asn || "",
+      org: value.org || value.asn || "Organization unavailable"
     };
   } catch {
-    return { ip, city: "Unknown", country: "", lat: null, lon: null, asn: "" };
+    return { ip, city: "Unknown", region: "", country: "", lat: null, lon: null, asn: "", org: "Organization unavailable" };
   }
 }
 

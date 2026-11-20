@@ -80,3 +80,14 @@ button.primary { border-color: rgba(103, 232, 249, .38); background: linear-grad
   counter-increment: none;
 }
 .path-list li.empty::before { content: none; }
+.hop-details {
+  display: block;
+  margin-top: 5px;
+  color: #91a3ba;
+  font: 11px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  word-break: normal;
+}
+.hop-details strong {
+  color: #dbeafe;
+  font-weight: 700;
+}

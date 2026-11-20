@@ -36,7 +36,20 @@ function renderPath(hops) {
 
   for (const hop of hops) {
     const item = document.createElement("li");
-    item.textContent = hop.ip;
+    item.appendChild(document.createElement("strong")).textContent = hop.ip;
+
+    const details = document.createElement("span");
+    details.className = "hop-details";
+
+    const location = [hop.city, hop.region, hop.country].filter(Boolean).join(", ");
+    const server = hop.org || hop.asn || "Server/ASN unavailable";
+    const latency = hop.latency != null && hop.latency > 0
+      ? `${Number(hop.latency).toFixed(1)} ms`
+      : "Latency unavailable";
+
+    details.textContent =
+      `${location || "Location unavailable"} · ${server} · ${latency}`;
+    item.appendChild(details);
     pathList.appendChild(item);
   }
 }
