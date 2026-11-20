@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "LiquidGlass",
   "version": "1.0.0",
-  "description": "Applies an iOS-style frosted glassmorphism theme to websites.",
+  "description": "Applies a local iOS-style frosted glassmorphism theme to GitHub.",
   "permissions": ["activeTab", "storage", "scripting"],
   "host_permissions": ["*://github.com/*", "*://www.github.com/*"],
   "action": {

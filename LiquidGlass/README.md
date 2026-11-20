@@ -1,6 +1,6 @@
 # LiquidGlass
 
-LiquidGlass is a Manifest V3 Chrome extension that applies an AI-generated iOS-style glassmorphism theme to websites.
+LiquidGlass is a Manifest V3 Chrome extension that applies a local iOS-style glassmorphism theme to GitHub.
 
 ## Load
 
@@ -9,15 +9,11 @@ LiquidGlass is a Manifest V3 Chrome extension that applies an AI-generated iOS-s
 3. Click **Load unpacked**.
 4. Select this `LiquidGlass` folder.
 
-## Configure
-
-Open the extension's **Options** page and enter an OpenAI-compatible chat completions endpoint, API key, and model name.
-
 ## Use
 
-1. Open a website.
+1. Open GitHub.
 2. Open the LiquidGlass popup.
-3. Enable the theme for the current domain.
+3. Enable the theme for GitHub.
 4. Adjust **Blur Intensity** and **Tint Opacity**.
 
-The generated stylesheet is cached per domain in Chrome sync storage. Disabling the theme removes the generated and control styles from that page.*** End Patch
+No API key or AI request is used. The GitHub stylesheet is generated locally and replaced when slider values change.*** End Patch
