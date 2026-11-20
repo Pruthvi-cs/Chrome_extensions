@@ -52,7 +52,7 @@ chrome.webRequest.onResponseStarted.addListener(
   (details) => {
     if (details.tabId < 0) return;
     const data = getData(details.tabId);
-    if (details.ip) data.destinationIp = details.ip;
+    if (details.type === "main_frame" && details.ip) data.destinationIp = details.ip;
 
     try {
       const requestUrl = new URL(details.url);
