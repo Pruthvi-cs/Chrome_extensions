@@ -32,6 +32,15 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   }
 });
 
+chrome.tabs.onActivated.addListener(async ({ tabId }) => {
+  try {
+    const tab = await chrome.tabs.get(tabId);
+    if (tab.url?.startsWith("http")) {
+      getData(tabId).domain = new URL(tab.url).hostname;
+    }
+  } catch {}
+});
+
 chrome.tabs.onRemoved.addListener((tabId) => tabData.delete(tabId));
 
 chrome.webRequest.onBeforeRedirect.addListener(
@@ -127,12 +136,20 @@ async function globalpingTrace(domain) {
   for (const probe of result.results) {
     const probeHops = probe?.result?.hops || [];
     for (const hop of probeHops) {
-      const ip = hop?.resolvedAddress || hop?.address || hop?.ip;
+      const ip = hop?.resolvedAddress ||
+        hop?.resolved_address ||
+        hop?.address ||
+        hop?.ip ||
+        (typeof hop?.ipAddress === "string" ? hop.ipAddress : null);
       if (!ip || hop?.timeout) continue;
+      let latency = hop?.rtt?.[0] ?? hop?.rtt ?? hop?.latency ?? hop?.avg;
+      if (typeof latency === "object" && latency !== null) {
+        latency = latency.value ?? latency.avg ?? latency.rtt ?? 0;
+      }
       hops.push({
         ttl: Number(hop.ttl || hop.hop || hops.length + 1),
         ip,
-        latency: Number(hop?.rtt?.[0] ?? hop?.rtt ?? hop?.latency ?? 0)
+        latency: Number(latency || 0)
       });
     }
   }

@@ -9,6 +9,13 @@ async function getActiveTab() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab?.id) return null;
   activeTabId = tab.id;
+  if (tab.url?.startsWith("http")) {
+    routeData = {
+      ...(routeData || {}),
+      domain: new URL(tab.url).hostname
+    };
+    domainEl.textContent = routeData.domain;
+  }
   return tab;
 }
 
@@ -60,7 +67,7 @@ traceButton.addEventListener("click", async () => {
   await getActiveTab();
   if (!activeTabId) return;
 
-  getState();
+  await getActiveTab();
   traceButton.disabled = true;
   traceButton.textContent = "Tracing...";
   pathList.innerHTML = '<li class="empty">Tracing route...</li>';
