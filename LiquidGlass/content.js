@@ -1,140 +1,122 @@
 (() => {
-  if (window.__liquidGlassContent) {
-    chrome.runtime.onMessage.addListener(window.__liquidGlassContent);
-  }
   if (window.__liquidGlassLoaded) return;
-
   window.__liquidGlassLoaded = true;
 
-  const styleId = "liquid-glass-generated-css";
-  const controlsId = "liquid-glass-control-css";
-  let domain = location.hostname;
-  let generatedCss = "";
+  if (!["github.com", "www.github.com"].includes(location.hostname)) return;
+
   let blur = 18;
   let opacity = 18;
 
-  function colorToHex(value) {
-    if (!value || value === "transparent" || value === "rgba(0, 0, 0, 0)") return null;
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    if (!context) return null;
-    context.fillStyle = value;
-    const normalized = context.fillStyle;
-    if (normalized.startsWith("#")) {
-      return normalized.length === 7 ? normalized : null;
-    }
-    const match = normalized.match(/[\d.]+/g);
-    if (!match) return null;
-    const rgb = match.slice(0, 3).map((part) => Math.round(Number(part)));
-    return "#" + rgb.map((part) => part.toString(16).padStart(2, "0")).join("");
-  }
-
-  function summarizePage() {
-    const bodyStyle = getComputedStyle(document.body);
-    const textCandidate = document.querySelector("h1, h2, p") || document.body;
-    const textStyle = getComputedStyle(textCandidate);
-    const major = {};
-
-    ["header", "nav", "article", "aside", ".card"].forEach((selector) => {
-      const elements = [...document.querySelectorAll(selector)].slice(0, 5);
-      major[selector] = elements.map((element) => {
-        const rect = element.getBoundingClientRect();
-        const style = getComputedStyle(element);
-        return {
-          tag: element.tagName.toLowerCase(),
-          size: [Math.round(rect.width), Math.round(rect.height)],
-          background: colorToHex(style.backgroundColor),
-          color: colorToHex(style.color),
-          borderRadius: style.borderRadius
-        };
-      });
-    });
-
-    return {
-      domain,
-      title: document.title,
-      language: document.documentElement.lang || null,
-      backgroundColor: colorToHex(bodyStyle.backgroundColor),
-      textColor: colorToHex(textStyle.color),
-      majorContainers: major,
-      viewport: [innerWidth, innerHeight]
-    };
-  }
-
-  function controlCss() {
+  function createCss() {
+    const tint = opacity / 100;
     return `
-#${styleId} { --liquid-glass-blur: ${blur}px; --liquid-glass-opacity: ${opacity / 100}; }
-.liquid-glass-fallback-body,
-body.liquid-glass-enabled {
+html[data-color-mode="dark"] body::before,
+html[data-color-mode="auto"] body::before,
+body::before {
+  content: "";
+  position: fixed;
+  inset: -25%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(56, 189, 248, ${tint + 0.18}), transparent 28%),
+    radial-gradient(circle at 78% 18%, rgba(168, 85, 247, ${tint + 0.12}), transparent 30%),
+    radial-gradient(circle at 65% 78%, rgba(59, 130, 246, ${tint + 0.12}), transparent 32%);
+  filter: blur(48px);
+  transform: translateZ(0);
+}
+
+body {
   background-attachment: fixed !important;
 }
-.liquid-glass-fallback-body header,
-.liquid-glass-fallback-body nav,
-.liquid-glass-fallback-body article,
-.liquid-glass-fallback-body aside,
-.liquid-glass-fallback-body .card {
-  background: rgba(255,255,255,var(--liquid-glass-opacity)) !important;
-  backdrop-filter: blur(var(--liquid-glass-blur)) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(var(--liquid-glass-blur)) saturate(160%) !important;
-  border: 1px solid rgba(255,255,255,0.25) !important;
-  box-shadow: 0 12px 36px rgba(15,23,42,.12) !important;
+
+.application-main,
+.Layout,
+.Box,
+.Box-header,
+.Box-body,
+.TimelineItem,
+.discussion-timeline-actions,
+.js-discussion,
+.repository-content,
+[role="navigation"],
+.Header,
+.header,
+.js-header-wrapper,
+.pagehead,
+.UnderlineNav,
+.file,
+.blob-wrapper,
+.markdown-body,
+.topic-tag,
+.filter-item,
+.Label,
+.Counter,
+.dropdown-menu,
+.Popover-message,
+.SelectMenu-modal,
+.ActionList,
+.TableObject {
+  backdrop-filter: blur(${blur}px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(${blur}px) saturate(160%) !important;
+  background: rgba(255, 255, 255, ${tint}) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12) !important;
+}
+
+html[data-color-mode="dark"] .Box,
+html[data-color-mode="dark"] .Box-header,
+html[data-color-mode="dark"] .Box-body,
+html[data-color-mode="dark"] .TimelineItem,
+html[data-color-mode="dark"] .Layout,
+html[data-color-mode="dark"] .Header,
+html[data-color-mode="dark"] .file,
+html[data-color-mode="dark"] .blob-wrapper,
+html[data-color-mode="dark"] .dropdown-menu,
+html[data-color-mode="dark"] .SelectMenu-modal,
+html[data-color-mode="dark"] .Popover-message {
+  background: rgba(13, 17, 23, ${Math.min(tint + 0.28, 0.82)}) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+}
+
+.Box,
+.TimelineItem,
+.Layout-sidebar,
+.Layout-main,
+.discussion-timeline-actions,
+.file,
+.TableObject {
+  border-radius: 12px !important;
+}
+
+.topic-tag,
+.Label,
+.Counter,
+.filter-item,
+button,
+input,
+textarea,
+select {
+  border-radius: 8px !important;
 }
 `;
   }
 
-  function setControlCss() {
-    let style = document.getElementById(controlsId);
-    if (!style) {
-      style = document.createElement("style");
-      style.id = controlsId;
-      document.documentElement.appendChild(style);
-    }
-    style.textContent = controlCss();
-  }
-
-  function applyGeneratedCss(css) {
-    generatedCss = css;
-  }
-
-  async function enable(blurValue, opacityValue) {
+  function applySettings(blurValue, opacityValue) {
     blur = blurValue ?? blur;
     opacity = opacityValue ?? opacity;
-    document.body?.classList.add("liquid-glass-enabled");
-    setControlCss();
-
-    const summary = summarizePage();
-    chrome.storage.sync.get([`lgDomain:${domain}:css`], (stored) => {
-      const cached = stored[`lgDomain:${domain}:css`];
-      if (cached) {
-        applyGeneratedCss(cached);
-        chrome.runtime.sendMessage({
-          type: "lg:applyCached",
-          css: cached
-        });
-        return;
-      }
-
-      chrome.runtime.sendMessage({
-        type: "lg:generate",
-        summary
-      }, (response) => {
-        if (chrome.runtime.lastError || !response?.ok) return;
-        applyGeneratedCss(response.css);
-        chrome.storage.sync.set({ [`lgDomain:${domain}:css`]: response.css });
-      });
+    chrome.runtime.sendMessage({
+      type: "lg:apply",
+      css: createCss()
     });
   }
 
+  function enable(blurValue, opacityValue) {
+    applySettings(blurValue, opacityValue);
+  }
+
   function disable() {
-    document.body?.classList.remove("liquid-glass-enabled");
-    document.getElementById(controlsId)?.remove();
-    if (generatedCss) {
-      chrome.runtime.sendMessage({
-        type: "lg:remove",
-        css: generatedCss
-      });
-      generatedCss = "";
-    }
+    chrome.runtime.sendMessage({ type: "lg:remove" });
   }
 
   const listener = (message, sender, sendResponse) => {
@@ -148,16 +130,8 @@ body.liquid-glass-enabled {
       sendResponse({ ok: true });
       return true;
     }
-    if (message?.type === "lg:getState") {
-      chrome.storage.sync.get([`lgDomain:${domain}:enabled`], (stored) => {
-        sendResponse({ enabled: Boolean(stored[`lgDomain:${domain}:enabled`]) });
-      });
-      return true;
-    }
     if (message?.type === "lg:settings") {
-      blur = message.blur;
-      opacity = message.opacity;
-      setControlCss();
+      applySettings(message.blur, message.opacity);
       sendResponse({ ok: true });
       return true;
     }
@@ -166,8 +140,8 @@ body.liquid-glass-enabled {
   chrome.runtime.onMessage.addListener(listener);
   window.__liquidGlassContent = listener;
 
-  chrome.storage.sync.get([`lgDomain:${domain}:enabled`], (stored) => {
-    if (stored[`lgDomain:${domain}:enabled`]) {
+  chrome.storage.sync.get([`lgDomain:github.com:enabled`], (stored) => {
+    if (stored["lgDomain:github.com:enabled"]) {
       chrome.storage.sync.get(["lgBlur", "lgOpacity"], (settings) => {
         enable(settings.lgBlur ?? 18, settings.lgOpacity ?? 18);
       });
