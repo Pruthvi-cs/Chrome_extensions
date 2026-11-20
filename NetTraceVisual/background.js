@@ -159,37 +159,6 @@ async function backendTrace(endpoint, domain) {
   })).filter((hop) => hop.ip);
 }
 
-async function diagnose(hops, routeData) {
-  const settings = await chrome.storage.sync.get(["aiEndpoint", "aiApiKey", "aiModel"]);
-  if (!settings.aiApiKey) throw new Error("Configure an AI API key in extension options.");
-
-  const response = await fetch(settings.aiEndpoint || "https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${settings.aiApiKey}`
-    },
-    body: JSON.stringify({
-      model: settings.aiModel || "gpt-4o-mini",
-      temperature: 0.2,
-      messages: [
-        {
-          role: "system",
-          content: "Diagnose this network route concisely. Identify routing anomalies, likely CDN edge locations, private-network boundaries, redirect effects, third-party domains, and high-latency hops. Return clear bullet points without claiming certainty where evidence is limited."
-        },
-        { role: "user", content: JSON.stringify({ routeData, hops }) }
-      ]
-    })
-  });
-  if (!response.ok) throw new Error(`AI request failed (${response.status})`);
-  const data = await response.json();
-  const diagnosis = data?.choices?.[0]?.message?.content ||
-    data?.output_text ||
-    data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!diagnosis) throw new Error("AI returned no diagnosis.");
-  return diagnosis;
-}
-
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type === "nt:getState") {
     const tabId = message.tabId;
@@ -229,10 +198,4 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     return true;
   }
 
-  if (message?.type === "nt:diagnose") {
-    diagnose(message.hops || [], message.routeData || {})
-      .then((text) => sendResponse({ ok: true, text }))
-      .catch((error) => sendResponse({ ok: false, error: error.message }));
-    return true;
-  }
 });
