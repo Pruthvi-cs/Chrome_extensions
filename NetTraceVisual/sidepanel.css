@@ -87,6 +87,11 @@ button.primary { border-color: rgba(103, 232, 249, .38); background: linear-grad
   font: 11px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   word-break: normal;
 }
+.path-list li > strong {
+  color: #edf4ff;
+  font-size: 13px;
+  letter-spacing: .01em;
+}
 .hop-details strong {
   color: #dbeafe;
   font-weight: 700;

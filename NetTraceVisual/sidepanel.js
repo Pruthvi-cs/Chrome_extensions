@@ -42,13 +42,15 @@ function renderPath(hops) {
     details.className = "hop-details";
 
     const location = [hop.city, hop.region, hop.country].filter(Boolean).join(", ");
-    const server = hop.org || hop.asn || "Server/ASN unavailable";
+    const server = hop.org || "Organization unavailable";
+    const asn = hop.asn || "ASN unavailable";
+    const ipType = hop.ip.includes(":") ? "IPv6" : "IPv4";
     const latency = hop.latency != null && hop.latency > 0
       ? `${Number(hop.latency).toFixed(1)} ms`
       : "Latency unavailable";
 
     details.textContent =
-      `${location || "Location unavailable"} · ${server} · ${latency}`;
+      `${location || "Location unavailable"} · ${server} · ${asn} · ${ipType} · ${latency}`;
     item.appendChild(details);
     pathList.appendChild(item);
   }
