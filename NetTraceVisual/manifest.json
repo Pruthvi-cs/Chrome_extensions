@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "NetTrace Visual",
+  "version": "1.0.0",
+  "description": "Visualize network routes, redirect chains, third-party domains, and routing latency.",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "sidePanel",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_title": "Open NetTrace Visual"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "options_page": "options.html",
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  }
+}

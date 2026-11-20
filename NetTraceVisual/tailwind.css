@@ -1,0 +1,3 @@
+/* Lightweight Tailwind-style utility subset used by the side panel. */
+* { box-sizing: border-box; }
+button, input, select { font: inherit; }
