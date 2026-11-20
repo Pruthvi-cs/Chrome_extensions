@@ -39,7 +39,7 @@ async function init() {
 
   const enabled = Boolean(settings.dpEnabled);
   toggle.classList.toggle("on", enabled);
-  toggleText.textTextContent = enabled ? "Disable parallax" : "Enable parallax";
+  toggleText.textContent = enabled ? "Disable parallax" : "Enable parallax";
 
   try {
     await ensureContent(tab.id);
