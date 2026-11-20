@@ -4,12 +4,11 @@
   "version": "1.0.0",
   "description": "Applies an iOS-style frosted glassmorphism theme to websites.",
   "permissions": ["activeTab", "storage", "scripting"],
-  "host_permissions": ["<all_urls>"],
+  "host_permissions": ["*://github.com/*", "*://www.github.com/*"],
   "action": {
     "default_popup": "popup.html",
     "default_title": "LiquidGlass"
   },
-  "options_page": "options.html",
   "background": {
     "service_worker": "background.js",
     "type": "module"

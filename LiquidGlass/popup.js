@@ -48,6 +48,16 @@ async function init() {
     return;
   }
 
+  const hostname = new URL(tab.url).hostname.replace(/^www\./, "");
+  if (hostname !== "github.com") {
+    domainLabel.textContent = hostname;
+    status.textContent = "LiquidGlass supports GitHub only.";
+    toggle.disabled = true;
+    blurInput.disabled = true;
+    opacityInput.disabled = true;
+    return;
+  }
+
   domain = new URL(tab.url).hostname;
   domainLabel.textContent = domain;
   await getDomainState();
