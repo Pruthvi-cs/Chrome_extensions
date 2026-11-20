@@ -1,0 +1,44 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 260px;
+  margin: 0;
+  padding: 18px;
+  color: #202124;
+  font: 14px/1.4 Arial, sans-serif;
+  background: #ffffff;
+}
+
+h1 {
+  margin: 0 0 14px;
+  font-size: 18px;
+}
+
+.counter {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #eef7f0;
+  color: #1b5e20;
+}
+
+#blocked-count {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.counter span {
+  font-size: 12px;
+}
+
+.setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+}
