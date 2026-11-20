@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <header>
+      <span class="orb"></span>
+      <h1>DepthParallax</h1>
+    </header>
+
+    <button id="toggle" type="button">
+      <span id="toggleText">Enable parallax</span>
+      <span class="switch"><span></span></span>
+    </button>
+
+    <label for="strength">
+      <span>Depth strength</span>
+      <output id="strengthValue">12px</output>
+    </label>
+    <input id="strength" type="range" min="0" max="30" value="12">
+
+    <label for="smoothness">
+      <span>Smoothing</span>
+      <output id="smoothnessValue">18%</output>
+    </label>
+    <input id="smoothness" type="range" min="5" max="40" value="18">
+
+    <p id="status" aria-live="polite"></p>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>

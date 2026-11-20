@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "DepthParallax",
+  "version": "1.0.0",
+  "description": "Adds subtle iOS-inspired 3D depth parallax to webpages.",
+  "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_title": "DepthParallax",
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html",
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  }
+}
