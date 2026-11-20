@@ -86,7 +86,16 @@
   shadow.appendChild(button);
 
   function getImageUrl(image) {
-    return image.currentSrc || image.src || image.dataset?.src || "";
+    if (image.dataset?.src && /^https?:/i.test(image.dataset.src)) {
+      return image.dataset.src;
+    }
+    if (image.src && !/^blob:/i.test(image.src)) {
+      return image.src;
+    }
+    if (image.currentSrc && !/^blob:/i.test(image.currentSrc)) {
+      return image.currentSrc;
+    }
+    return image.dataset?.src || image.src || "";
   }
 
   function getFileName(url) {
@@ -170,6 +179,11 @@
 
     const url = getImageUrl(currentImage);
     if (!url) return;
+    if (!chrome.runtime?.id) {
+      button.querySelector("span:last-child").textContent = "Reload page";
+      return;
+    }
+
     chrome.runtime.sendMessage({
       type: "imageDownloader:download",
       url,
