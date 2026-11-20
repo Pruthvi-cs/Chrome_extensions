@@ -45,15 +45,6 @@
     }
   },
   {
-    "id": 6,
-    "priority": 1,
-    "action": { "type": "block" },
-    "condition": {
-      "urlFilter": "||googlevideo.com/videoplayback",
-      "resourceTypes": ["media"]
-    }
-  },
-  {
     "id": 7,
     "priority": 1,
     "action": { "type": "block" },

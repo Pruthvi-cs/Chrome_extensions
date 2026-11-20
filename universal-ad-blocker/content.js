@@ -1,6 +1,7 @@
 let blockingEnabled = true;
 const removedElements = new WeakSet();
 let blockedCount = 0;
+let lastYouTubeAdVideo = null;
 
 const AD_SELECTORS = [
   ".video-ads",
@@ -62,13 +63,19 @@ function removePageAds() {
 function skipYouTubeAd() {
   const player = document.querySelector(".html5-video-player");
   const video = document.querySelector("video");
-  if (!player?.classList.contains("ad-showing") || !video) return;
+  if (!player?.classList.contains("ad-showing") || !video) {
+    lastYouTubeAdVideo = null;
+    return;
+  }
 
   document.querySelector(".ytp-ad-skip-button, .ytp-ad-skip-button-modern")?.click();
   if (Number.isFinite(video.duration) && video.duration > 0) {
     video.currentTime = video.duration;
   }
-  reportBlocked();
+  if (lastYouTubeAdVideo !== video) {
+    lastYouTubeAdVideo = video;
+    reportBlocked();
+  }
 }
 
 function hideSpotifyAd() {
