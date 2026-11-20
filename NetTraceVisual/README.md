@@ -1,6 +1,6 @@
 # NetTrace Visual
 
-A Manifest V3 Chrome side-panel extension for inspecting the active page's destination IP, redirect chain, third-party domains, Globalping traceroute hops, hop geolocation, and route diagnosis.
+A keyless Manifest V3 Chrome side-panel extension for showing the active page's ordered traceroute IP path.
 
 ## Load
 
@@ -14,6 +14,6 @@ A Manifest V3 Chrome side-panel extension for inspecting the active page's desti
 1. Open a normal website.
 2. Click the NetTrace Visual toolbar action to open the side panel.
 3. Click **Trace Route**.
-4. Click **Diagnose Route** after public hops appear.
+4. View the ordered public IP hops.
 
-The extension uses Globalping by default. A custom traceroute backend can be configured on the extension Options page. AI diagnosis also requires an OpenAI-compatible endpoint and API key.
+The extension uses Globalping by default. A custom traceroute backend can be configured on the extension Options page. No API key is required.

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "NetTrace Visual",
   "version": "1.0.0",
-  "description": "Visualize network routes, redirect chains, third-party domains, and routing latency.",
+  "description": "Display the IP path for the active website.",
   "permissions": [
     "activeTab",
     "storage",
