@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <header>
+      <div class="mark"></div>
+      <h1>LiquidGlass</h1>
+      <span id="domain"></span>
+    </header>
+
+    <button id="toggle" type="button">
+      <span id="toggleText">Enable for this domain</span>
+      <span class="switch"><span></span></span>
+    </button>
+
+    <section>
+      <label for="blur">
+        <span>Blur Intensity</span>
+        <output id="blurValue">18px</output>
+      </label>
+      <input id="blur" type="range" min="0" max="40" value="18">
+    </section>
+
+    <section>
+      <label for="opacity">
+        <span>Tint Opacity</span>
+        <output id="opacityValue">18%</output>
+      </label>
+      <input id="opacity" type="range" min="5" max="60" value="18">
+    </section>
+
+    <p id="status" aria-live="polite"></p>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>
