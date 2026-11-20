@@ -93,14 +93,7 @@ body.liquid-glass-enabled {
   }
 
   function applyGeneratedCss(css) {
-    let style = document.getElementById(styleId);
-    if (!style) {
-      style = document.createElement("style");
-      style.id = styleId;
-      document.documentElement.appendChild(style);
-    }
     generatedCss = css;
-    style.textContent = css;
   }
 
   async function enable(blurValue, opacityValue) {
@@ -114,6 +107,10 @@ body.liquid-glass-enabled {
       const cached = stored[`lgDomain:${domain}:css`];
       if (cached) {
         applyGeneratedCss(cached);
+        chrome.runtime.sendMessage({
+          type: "lg:applyCached",
+          css: cached
+        });
         return;
       }
 
@@ -130,8 +127,14 @@ body.liquid-glass-enabled {
 
   function disable() {
     document.body?.classList.remove("liquid-glass-enabled");
-    document.getElementById(styleId)?.remove();
     document.getElementById(controlsId)?.remove();
+    if (generatedCss) {
+      chrome.runtime.sendMessage({
+        type: "lg:remove",
+        css: generatedCss
+      });
+      generatedCss = "";
+    }
   }
 
   const listener = (message, sender, sendResponse) => {

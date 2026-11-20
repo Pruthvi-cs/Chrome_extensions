@@ -1,4 +1,25 @@
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === "lg:applyCached") {
+    if (sender?.tab?.id && message.css) {
+      chrome.scripting.insertCSS({
+        target: { tabId: sender.tab.id },
+        css: message.css
+      }).then(() => sendResponse({ ok: true }))
+        .catch((error) => sendResponse({ ok: false, error: error.message }));
+      return true;
+    }
+  }
+
+  if (message?.type === "lg:remove") {
+    if (sender?.tab?.id && message.css) {
+      chrome.scripting.removeCSS({
+        target: { tabId: sender.tab.id },
+        css: message.css
+      }).then(() => sendResponse({ ok: true }))
+        .catch((error) => sendResponse({ ok: true }));
+      return true;
+    }
+  }
   if (message?.type === "lg:generate") {
     (async () => {
       const settings = await chrome.storage.sync.get(["lgEndpoint", "lgApiKey", "lgModel"]);
@@ -38,6 +59,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         css = cleaned;
       }
       if (!css) throw new Error("The AI returned an invalid stylesheet.");
+      if (sender?.tab?.id) {
+        await chrome.scripting.insertCSS({
+          target: { tabId: sender.tab.id },
+          css
+        });
+      }
       sendResponse({ ok: true, css });
     })().catch((error) => sendResponse({ ok: false, error: error.message }));
     return true;
