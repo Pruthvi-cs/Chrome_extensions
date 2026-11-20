@@ -19,6 +19,10 @@ enabledInput.addEventListener("change", async () => {
     chrome.tabs.sendMessage(tab.id, {
       type: "imageDownloader:setEnabled",
       enabled: enabledInput.checked
-    }).catch(() => {});
+    }, () => {
+      if (chrome.runtime.lastError) {
+        status.textContent = "Reload this page to apply the setting.";
+      }
+    });
   }
 });

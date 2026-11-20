@@ -174,6 +174,22 @@
       type: "imageDownloader:download",
       url,
       filename: getFileName(url)
+    }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.warn("ImageDownloader:", chrome.runtime.lastError.message);
+        button.querySelector("span:last-child").textContent = "Download failed";
+        setTimeout(() => {
+          button.querySelector("span:last-child").textContent = "Download";
+        }, 1400);
+        return;
+      }
+      if (!response?.ok) {
+        console.warn("ImageDownloader:", response?.error || "Download failed.");
+        button.querySelector("span:last-child").textContent = "Download failed";
+        setTimeout(() => {
+          button.querySelector("span:last-child").textContent = "Download";
+        }, 1400);
+      }
     });
   });
 
