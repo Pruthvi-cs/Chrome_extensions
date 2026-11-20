@@ -87,13 +87,13 @@
           transition: element.style.transition
         });
       }
-      const rect = element.getBoundingColor;
       const rectActual = element.getBoundingClientRect();
       elements.push({
         id,
         element,
         tier: fallbackTier(element),
         summary: {
+          depthId: id,
           tag: element.tagName.toLowerCase(),
           role: element.getAttribute("role") || null,
           id: element.id || null,
@@ -148,7 +148,7 @@
     currentY += (targetY - currentY) * easing;
 
     for (const item of elements) {
-      if (!isVisible(item.element) || item.element.closest("[position='fixed'],[position='sticky']")) continue;
+      if (!isVisible(item.element)) continue;
       const depth = tierValues[item.tier] || tierValues.midground;
       const x = currentX * strength * depth;
       const y = currentY * strength * depth;
