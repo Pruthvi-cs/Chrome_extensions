@@ -1,8 +1,4 @@
 (() => {
-  if (window.__naturalCssEditor) {
-    chrome.runtime.onMessage.addListener(window.__naturalCssEditorMessageListener);
-  }
-
   if (window.__naturalCssEditor) return;
 
   let active = false;
@@ -188,7 +184,7 @@
           const property = declaration.slice(0, separator).trim();
           const value = declaration.slice(separator + 1).trim();
           if (/^(?:-moz|-webkit|-ms)?-?[a-z][a-z0-9-]*$/i.test(property)) {
-            selected.style.setProperty(property, value.replace(/;$/, ""), "", "");
+            selected.style.setProperty(property, value.replace(/;$/, ""));
           }
         }
       }
