@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Natural CSS Editor",
+  "version": "1.0.0",
+  "description": "Visually select a page element and edit it with natural-language instructions.",
+  "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Natural CSS Editor"
+  },
+  "options_page": "options.html",
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  }
+}

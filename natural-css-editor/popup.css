@@ -1,0 +1,32 @@
+body {
+  width: 220px;
+  margin: 0;
+  font: 13px system-ui, sans-serif;
+  color: #172033;
+}
+
+main {
+  padding: 14px;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+p {
+  min-height: 32px;
+  margin: 8px 0 12px;
+  color: #5b6475;
+}
+
+button {
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  padding: 9px 12px;
+  background: #2563eb;
+  color: white;
+  cursor: pointer;
+  font-weight: 700;
+}
