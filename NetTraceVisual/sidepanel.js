@@ -66,8 +66,6 @@ function renderPath(hops) {
 traceButton.addEventListener("click", async () => {
   await getActiveTab();
   if (!activeTabId) return;
-
-  await getActiveTab();
   traceButton.disabled = true;
   traceButton.textContent = "Tracing...";
   pathList.innerHTML = '<li class="empty">Tracing route...</li>';
