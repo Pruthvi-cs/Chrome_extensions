@@ -10,6 +10,14 @@
   function createCss() {
     const tint = opacity / 100;
     return `
+html {
+  scroll-behavior: smooth !important;
+}
+
+body {
+  background-attachment: fixed !important;
+}
+
 html[data-color-mode="dark"] body::before,
 html[data-color-mode="auto"] body::before,
 body::before {
@@ -24,10 +32,85 @@ body::before {
     radial-gradient(circle at 65% 78%, rgba(59, 130, 246, ${tint + 0.12}), transparent 32%);
   filter: blur(48px);
   transform: translateZ(0);
+  animation: liquid-glass-mesh 18s ease-in-out infinite alternate;
 }
 
-body {
-  background-attachment: fixed !important;
+@keyframes liquid-glass-mesh {
+  0% { transform: translate3d(-2%, -1%, 0) scale(1); }
+  50% { transform: translate3d(2%, 1%, 0) scale(1.08) rotate(1deg); }
+  100% { transform: translate3d(-1%, 2%, 0) scale(1.04) rotate(-1deg); }
+}
+
+@keyframes liquid-glass-enter {
+  from { opacity: 0; transform: translateY(10px) scale(.992); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.Box,
+.TimelineItem,
+.Layout-sidebar,
+.Layout-main,
+.discussion-timeline-actions,
+.file,
+.TableObject,
+.topic-tag,
+.Label,
+.Counter,
+.filter-item,
+.dropdown-menu,
+.Popover-message,
+.SelectMenu-modal,
+.ActionList {
+  transition:
+    background-color .24s ease,
+    border-color .24s ease,
+    box-shadow .24s ease,
+    transform .24s cubic-bezier(.22, 1, .36, 1),
+    opacity .24s ease !important;
+}
+
+.Box:hover,
+.TimelineItem:hover,
+.file:hover,
+.topic-tag:hover,
+.Label:hover,
+.filter-item:hover,
+.ActionList-item:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 16px 38px rgba(15, 23, 42, ${tint + 0.12}) !important;
+}
+
+button,
+.btn,
+.Link--primary,
+a[role="button"] {
+  transition:
+    transform .18s cubic-bezier(.22, 1, .36, 1),
+    box-shadow .18s ease,
+    background-color .18s ease,
+    opacity .18s ease !important;
+}
+
+button:active,
+.btn:active,
+a[role="button"]:active {
+  transform: scale(.96) !important;
+}
+
+button:hover,
+.btn:hover,
+a[role="button"]:hover {
+  box-shadow: 0 8px 22px rgba(56, 189, 248, ${tint}) !important;
+}
+
+.Layout-main,
+.application-main,
+.repository-content,
+.markdown-body,
+.js-discussion,
+[data-turbo-temporary],
+.Box {
+  animation: liquid-glass-enter .42s cubic-bezier(.22, 1, .36, 1) both;
 }
 
 .application-main,
@@ -79,6 +162,37 @@ html[data-color-mode="dark"] .Popover-message {
   border: 1px solid rgba(255, 255, 255, 0.25) !important;
 }
 
+html[data-color-mode="dark"] .Box:hover,
+html[data-color-mode="dark"] .TimelineItem:hover,
+html[data-color-mode="dark"] .file:hover,
+html[data-color-mode="dark"] .topic-tag:hover,
+html[data-color-mode="dark"] .Label:hover,
+html[data-color-mode="dark"] .filter-item:hover {
+  box-shadow: 0 16px 42px rgba(0, 0, 0, ${Math.min(tint + 0.32, 0.72)}) !important;
+}
+
+html[data-color-mode="dark"] body,
+html[data-color-mode="dark"] .application-main,
+html[data-color-mode="dark"] .pagehead,
+html[data-color-mode="dark"] .Layout {
+  background-color: rgba(13, 17, 23, 0.72) !important;
+}
+
+html[data-color-mode="dark"] .markdown-body {
+  color: #e6edf3 !important;
+  background: rgba(13, 17, 23, ${Math.min(tint + 0.2, 0.76)}) !important;
+}
+
+html[data-color-mode="dark"] input,
+html[data-color-mode="dark"] textarea,
+html[data-color-mode="dark"] select,
+html[data-color-mode="dark"] .form-control,
+html[data-color-mode="dark"] .search-input {
+  background: rgba(22, 27, 34, ${Math.min(tint + 0.48, 0.88)}) !important;
+  color: #e6edf3 !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
 .Box,
 .TimelineItem,
 .Layout-sidebar,
@@ -98,6 +212,48 @@ input,
 textarea,
 select {
   border-radius: 8px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  body::before,
+  .Layout-main,
+  .application-main,
+  .repository-content,
+  .markdown-body,
+  .js-discussion,
+  [data-turbo-temporary],
+  .Box {
+    animation: none !important;
+  }
+
+  .Box,
+  .TimelineItem,
+  .Layout-sidebar,
+  .Layout-main,
+  .discussion-timeline-actions,
+  .file,
+  .TableObject,
+  button,
+  .btn,
+  a,
+  .topic-tag,
+  .Label,
+  .Counter,
+  .filter-item {
+    transition: none !important;
+  }
+
+  .Box:hover,
+  .TimelineItem:hover,
+  .file:hover,
+  button:active,
+  .btn:active {
+    transform: none !important;
+  }
 }
 `;
   }
