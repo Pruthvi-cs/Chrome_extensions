@@ -2,6 +2,8 @@ let blockingEnabled = true;
 const removedElements = new WeakSet();
 let blockedCount = 0;
 let lastYouTubeAdVideo = null;
+let youtubeAdHandledAt = 0;
+let cleanupFrame = 0;
 
 const AD_SELECTORS = [
   ".video-ads",
@@ -61,6 +63,8 @@ function removePageAds() {
 }
 
 function skipYouTubeAd() {
+  if (!location.hostname.endsWith("youtube.com")) return;
+
   const player = document.querySelector(".html5-video-player");
   const video = document.querySelector("video");
   if (!player?.classList.contains("ad-showing") || !video) {
@@ -68,10 +72,17 @@ function skipYouTubeAd() {
     return;
   }
 
-  document.querySelector(".ytp-ad-skip-button, .ytp-ad-skip-button-modern")?.click();
-  if (Number.isFinite(video.duration) && video.duration > 0) {
-    video.currentTime = video.duration;
+  const now = Date.now();
+  if (now - youtubeAdHandledAt < 500) return;
+
+  const skipButton = document.querySelector(
+    ".ytp-ad-skip-button, .ytp-ad-skip-button-modern"
+  );
+  if (skipButton) {
+    youtubeAdHandledAt = now;
+    skipButton.click();
   }
+
   if (lastYouTubeAdVideo !== video) {
     lastYouTubeAdVideo = video;
     reportBlocked();
@@ -101,9 +112,17 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
   }
 });
 
-new MutationObserver(removePageAds).observe(document.documentElement, {
+new MutationObserver(() => {
+  if (cleanupFrame) return;
+  cleanupFrame = requestAnimationFrame(() => {
+    cleanupFrame = 0;
+    removePageAds();
+  });
+}).observe(document.documentElement, {
   childList: true,
-  subtree: true
+  subtree: true,
+  attributes: false,
+  characterData: false
 });
 
-setInterval(removePageAds, 1000);
+setInterval(removePageAds, 1500);
