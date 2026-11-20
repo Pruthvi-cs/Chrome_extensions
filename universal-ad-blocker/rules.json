@@ -113,7 +113,7 @@
     "action": { "type": "block" },
     "condition": {
       "urlFilter": "||adtechus.com^",
-      "resourceTypes": ["sub_frame", "script", "xmlhttrequet", "image", "media", "other"]
+      "resourceTypes": ["sub_frame", "script", "xmlhttprequest", "image", "media", "other"]
     }
   },
   {
