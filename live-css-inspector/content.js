@@ -209,17 +209,6 @@
     return rect;
   }
 
-  function getSelectorHint(element) {
-    if (element.id) return `${element.tagName.toLowerCase()}#${element.id}`;
-    const className =
-      typeof element.className === "string"
-        ? element.className.trim().split(/\s+/)[0]
-        : "";
-    return className
-      ? `${element.tagName.toLower}."
-      : `${element.tagName.toLowerCase()}`;
-  }
-
   function getTagName(element) {
     const tagName = element.tagName.toLowerCase();
     const inputType = element.tagName === "INPUT" ? element.type : "";
