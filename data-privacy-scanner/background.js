@@ -69,6 +69,12 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
 chrome.tabs.onRemoved.addListener((tabId) => tabReports.delete(tabId));
 
+chrome.action.onClicked.addListener(async (tab) => {
+  if (tab?.windowId) {
+    await chrome.sidePanel.open({ windowId: tab.windowId });
+  }
+});
+
 chrome.webRequest.onBeforeRequest.addListener(
   (details) => {
     if (!details.tabId || details.tabId < 0 || details.type === "main_frame") return;

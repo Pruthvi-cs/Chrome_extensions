@@ -15,6 +15,9 @@
     "default_popup": "popup.html",
     "default_title": "Data Privacy Scanner"
   },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
   "background": {
     "service_worker": "background.js"
   },
