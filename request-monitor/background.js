@@ -104,7 +104,10 @@ chrome.tabs.onActivated.addListener(async ({ tabId }) => {
   } catch (_) {}
 });
 
-chrome.tabs.onRemoved.addListener((tabId) => tabData.delete(tabId));
+chrome.tabs.onRemoved.addListener((tabId) => {
+  tabData.delete(tabId);
+  persistData();
+});
 
 chrome.action.onClicked.addListener(async (tab) => {
   if (tab?.windowId) await chrome.sidePanel.open({ windowId: tab.windowId });
@@ -187,6 +190,7 @@ chrome.webRequest.onBeforeRedirect.addListener(
     const data = getData(details.tabId);
     const request = data.requests.find((item) => item.requestId === details.requestId);
     if (request) request.redirectCount++;
+    persistData();
   },
   { urls: ["http://*/*", "https://*/*"] }
 );
@@ -217,6 +221,7 @@ chrome.webRequest.onCompleted.addListener(
     request.ip = details.ip || request.ip;
     request.endTime = details.timeStamp;
     request.duration = Math.max(0, details.timeStamp - request.startTime);
+    persistData();
   },
   { urls: ["http://*/*", "https://*/*"] }
 );
