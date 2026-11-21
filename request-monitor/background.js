@@ -36,6 +36,22 @@ async function restoreData() {
 
 restoreData();
 
+async function recoverActiveTabs() {
+  const tabs = await chrome.tabs.query({});
+  for (const tab of tabs) {
+    if (!tab.id || !/^https?:\/\//.test(tab.url || "")) continue;
+    const data = getData(tab.id);
+    if (!data.pageUrl) {
+      data.pageUrl = tab.url;
+      try {
+        data.pageHost = new URL(tab.url).hostname;
+      } catch (_) {}
+    }
+  }
+}
+
+chrome.runtime.onStartup.addListener(recoverActiveTabs);
+
 function getData(tabId) {
   if (!tabData.has(tabId)) {
     tabData.set(tabId, {
@@ -180,7 +196,7 @@ function estimateRequestBody(requestBody) {
 
 chrome.webRequest.onBeforeRequest.addListener(
   (details) => addRequest(details, {}),
-  { urls: ["http://*/*", "https://*/*"] },
+  { urls: ["<all_urls>"] },
   ["requestBody"]
 );
 
@@ -192,12 +208,12 @@ chrome.webRequest.onBeforeRedirect.addListener(
     if (request) request.redirectCount++;
     persistData();
   },
-  { urls: ["http://*/*", "https://*/*"] }
+  { urls: ["<all_urls>"] }
 );
 
 chrome.webRequest.onHeadersReceived.addListener(
   (details) => addRequest(details, { statusCode: details.statusLine?.match(/(\d{3})/)?.[1] }),
-  { urls: ["http://*/*", "https://*/*"] },
+  { urls: ["<all_urls>"] },
   []
 );
 
@@ -207,7 +223,7 @@ chrome.webRequest.onResponseStarted.addListener(
     fromCache: details.fromCache,
     ip: details.ip
   }),
-  { urls: ["http://*/*", "https://*/*"] }
+  { urls: ["<all_urls>"] }
 );
 
 chrome.webRequest.onCompleted.addListener(
@@ -223,12 +239,12 @@ chrome.webRequest.onCompleted.addListener(
     request.duration = Math.max(0, details.timeStamp - request.startTime);
     persistData();
   },
-  { urls: ["http://*/*", "https://*/*"] }
+  { urls: ["<all_urls>"] }
 );
 
 chrome.webRequest.onErrorOccurred.addListener(
   (details) => addRequest(details, { error: details.error }),
-  { urls: ["http://*/*", "https://*/*"] }
+  { urls: ["<all_urls>"] }
 );
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
