@@ -100,7 +100,7 @@ chrome.webRequest.onBeforeRequest.addListener(
       report.trackerHosts.set(tracker, (report.trackerHosts.get(tracker) || 0) + 1);
     }
 
-    const url = details.url.toLower();
+    const url = details.url.toLowerCase();
     if (/utm_|analytics|pixel|collect|telemetry|tracking|track\//i.test(url)) {
       report.collectionSignals.set(
         "Analytics or tracking parameters",
