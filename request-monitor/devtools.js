@@ -26,6 +26,16 @@ chrome.devtools.network.onRequestFinished.addListener((request) => {
         : content.slice(0, 10000);
     }
 
+    let host = "";
+    let path = "/";
+    let protocol = "";
+    try {
+      const url = new URL(harRequest.url);
+      host = url.hostname;
+      path = url.pathname + url.search;
+      protocol = url.protocol;
+    } catch (_) {}
+
     chrome.runtime.sendMessage({
       type: "rm:devtoolsRequest",
       tabId: chrome.devtools.inspectedWindow.tabId,
@@ -33,9 +43,9 @@ chrome.devtools.network.onRequestFinished.addListener((request) => {
         requestId: `har:${request.startedDateTime}:${harRequest.url}`,
         method: harRequest.method,
         url: harRequest.url,
-        host: new URL(harRequest.url).hostname,
-        path: new URL(harRequest.url).pathname,
-        protocol: new URL(harRequest.url).protocol,
+        host,
+        path,
+        protocol,
         type: request._resourceType || request.type || "other",
         initiator: harRequest.headers.find((item) =>
           item.name.toLowerCase() === "origin"
@@ -59,7 +69,25 @@ chrome.devtools.network.onRequestFinished.addListener((request) => {
         endTime: Date.now(),
         duration: request.time,
         redirectCount: harResponse.redirectURL ? 1 : 0,
-        error: harResponse.status >= 400 ? `HTTP ${harResponse.status}` : ""
+        error: harResponse.status >= 400 ? `HTTP ${harResponse.status}` : "",
+        har: {
+          startedDateTime: request.startedDateTime,
+          time: request.time,
+          timings: request.timings,
+          serverIPAddress: request.serverIPAddress,
+          connection: request.connection,
+          resourceType: request._resourceType || request.type || "other",
+          requestHeaderSize: harRequest.headersSize,
+          responseHeaderSize: harResponse.headersSize,
+          requestCompression: harRequest.headersCompression,
+          responseCompression: harResponse.headersCompression,
+          redirectURL: harResponse.redirectURL,
+          mimeType: harResponse.content?.mimeType || "",
+          cookies: {
+            request: harRequest.cookies || [],
+            response: harResponse.cookies || []
+          }
+        }
       }
     });
   });
