@@ -9,14 +9,18 @@ enabledInput.addEventListener("change", async () => {
   const enabled = enabledInput.checked;
   await chrome.storage.local.set({ enabled });
 
-  if (enabled) {
-    await chrome.declarativeNetRequest.updateEnabledRulesets({
-      enableRulesetIds: ["common-ad-rules"]
-    });
-  } else {
-    await chrome.declarativeNetRequest.updateEnabledRulesets({
-      disableRulesetIds: ["common-ad-rules"]
-    });
+  try {
+    if (enabled) {
+      await chrome.declarativeNetRequest.updateEnabledRulesets({
+        enableRulesetIds: ["common-ad-rules"]
+      });
+    } else {
+      await chrome.declarativeNetRequest.updateEnabledRulesets({
+        disableRulesetIds: ["common-ad-rules"]
+      });
+    }
+  } catch (error) {
+    console.error("Unable to update ad blocking rules:", error);
   }
 });
 

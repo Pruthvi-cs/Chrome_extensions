@@ -122,20 +122,34 @@ chrome.storage.local.get({ enabled: true }).then(({ enabled }) => {
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if (areaName === "local" && changes.enabled) {
     blockingEnabled = changes.enabled.newValue;
+    if (blockingEnabled) {
+      removePageAds();
+    }
   }
 });
 
-new MutationObserver(() => {
-  if (cleanupFrame) return;
-  cleanupFrame = requestAnimationFrame(() => {
-    cleanupFrame = 0;
-    removePageAds();
+function startPageObserver() {
+  if (!document.documentElement) {
+    window.addEventListener("DOMContentLoaded", startPageObserver, { once: true });
+    return;
+  }
+
+  new MutationObserver(() => {
+    if (cleanupFrame) return;
+    cleanupFrame = requestAnimationFrame(() => {
+      cleanupFrame = 0;
+      removePageAds();
+    });
+  }).observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+    attributes: false,
+    characterData: false
   });
-}).observe(document.documentElement, {
-  childList: true,
-  subtree: true,
-  attributes: false,
-  characterData: false
-});
+
+  removePageAds();
+}
+
+startPageObserver();
 
 setInterval(removePageAds, 1500);
