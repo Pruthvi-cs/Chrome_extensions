@@ -48,6 +48,12 @@ function getReceivedSize(request) {
 
 function renderDetails(request) {
   const received = getReceivedSize(request);
+  const headersToText = (headers) => Array.isArray(headers)
+    ? headers.map((header) => `${header.name}: ${header.value}`).join("\n")
+    : "Unavailable";
+  const timings = request.har?.timings
+    ? Object.entries(request.har.timings).map(([name, value]) => `${name}: ${value} ms`).join("\n")
+    : "Unavailable";
   const rows = [
     ["URL", request.url],
     ["Method", request.method],
@@ -67,7 +73,17 @@ function renderDetails(request) {
       : "No request body captured"],
     ["Response Body", request.responseBody
       ? request.responseBody.slice(0, 5000)
-      : "No response body captured"]
+      : "No response body captured"],
+    ["Request Headers", headersToText(request.requestHeaders)],
+    ["Response Headers", headersToText(request.responseHeaders)],
+    ["Request Cookies", headersToText(request.har?.cookies?.request)],
+    ["Response Cookies", headersToText(request.har?.cookies?.response)],
+    ["Timing Breakdown", timings],
+    ["Server IP", request.har?.serverIPAddress || request.ip || "Unavailable"],
+    ["Connection", String(request.har?.connection || "Unavailable")],
+    ["MIME Type", request.har?.mimeType || "Unavailable"],
+    ["Request Header Size", String(request.har?.requestHeaderSize ?? "Unavailable")],
+    ["Response Header Size", String(request.har?.responseHeaderSize ?? "Unavailable")]
   ];
 
   detailList.replaceChildren();
