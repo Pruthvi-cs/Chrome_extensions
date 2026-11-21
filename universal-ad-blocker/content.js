@@ -1,19 +1,12 @@
 let blockingEnabled = true;
 const removedElements = new WeakSet();
 let blockedCount = 0;
-let lastYouTubeAdVideo = null;
-let youtubeAdHandledAt = 0;
 let cleanupFrame = 0;
 
 const AD_SELECTORS = [
   ".video-ads",
   ".ytp-ad-module",
   ".ytp-ad-overlay-container",
-  ".ytp-ad-text-overlay",
-  ".ytp-ad-image-overlay",
-  ".ytp-ad-player-overlay",
-  ".ytp-ad-progress",
-  ".ytp-paid-content-overlay",
   "ytd-ad-slot-renderer",
   "ytd-display-ad-renderer",
   "ytd-promoted-sparkles-web-renderer",
@@ -73,40 +66,6 @@ function removePageAds() {
 
   skipYouTubeAd();
   hideSpotifyAd();
-}
-
-function skipYouTubeAd() {
-  if (!location.hostname.endsWith("youtube.com")) return;
-
-  const player = document.querySelector(".html5-video-player");
-  const video = document.querySelector("video");
-  if (!player?.classList.contains("ad-showing") || !video) {
-    lastYouTubeAdVideo = null;
-    return;
-  }
-
-  const now = Date.now();
-  if (now - youtubeAdHandledAt < 500) return;
-
-  const skipButton = document.querySelector(
-    ".ytp-ad-skip-button, .ytp-ad-skip-button-modern"
-  );
-  if (skipButton) {
-    youtubeAdHandledAt = now;
-    skipButton.click();
-  } else if (Number.isFinite(video.duration) && video.duration > 0) {
-    youtubeAdHandledAt = now;
-    try {
-      video.currentTime = video.duration;
-    } catch (_) {
-      // Some embedded YouTube players prevent direct seeking.
-    }
-  }
-
-  if (lastYouTubeAdVideo !== video) {
-    lastYouTubeAdVideo = video;
-    reportBlocked();
-  }
 }
 
 function hideSpotifyAd() {

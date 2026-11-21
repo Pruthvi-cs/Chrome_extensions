@@ -5,7 +5,7 @@ A Manifest V3 Chrome extension that blocks common advertising networks and remov
 ## Features
 
 - Declarative network blocking for common ad and tracking domains.
-- Visible ad removal for YouTube, Spotify, and generic web ad containers.
+- Visible ad removal for generic web ad containers and supported ad slots.
 - Per-tab blocked-ad counter in the popup.
 - Global enable and disable control.
 - Uses Chrome local storage for the protection setting.
