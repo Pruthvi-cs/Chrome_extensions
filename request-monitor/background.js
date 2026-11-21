@@ -248,6 +248,23 @@ chrome.webRequest.onErrorOccurred.addListener(
 );
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === "rm:devtoolsRequest") {
+    const tabId = message.tabId;
+    if (!tabId) return;
+    const data = getData(tabId);
+    if (!data.listening) return;
+
+    const incoming = message.request;
+    const index = data.requests.findIndex((request) =>
+      request.requestId === incoming.requestId
+    );
+    if (index >= 0) data.requests[index] = incoming;
+    else data.requests.push(incoming);
+
+    if (data.requests.length > MAX_REQUESTS) data.requests.shift();
+    persistData();
+  }
+
   if (message?.type === "rm:pageTiming" && sender.tab?.id) {
     const data = getData(sender.tab.id);
     data.pageTiming = message.timing;

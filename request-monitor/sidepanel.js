@@ -61,7 +61,13 @@ function renderDetails(request) {
     ["Received", formatBytes(received)],
     ["From cache", request.fromCache ? "Yes" : "No"],
     ["Redirects", String(request.redirectCount)],
-    ["Error", request.error || "None"]
+    ["Error", request.error || "None"],
+    ["Request Body", request.requestBody
+      ? request.requestBody.slice(0, 5000)
+      : "No request body captured"],
+    ["Response Body", request.responseBody
+      ? request.responseBody.slice(0, 5000)
+      : "No response body captured"]
   ];
 
   detailList.replaceChildren();
