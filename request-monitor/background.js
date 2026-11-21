@@ -1,5 +1,40 @@
 const tabData = new Map();
 const MAX_REQUESTS = 500;
+let persistTimer = null;
+
+async function persistData() {
+  if (persistTimer) clearTimeout(persistTimer);
+  persistTimer = setTimeout(async () => {
+    const serializable = {};
+    for (const [tabId, data] of tabData.entries()) {
+      serializable[String(tabId)] = {
+        pageUrl: data.pageUrl,
+        pageHost: data.pageHost,
+        listening: data.listening,
+        clearStart: data.clearStart,
+        pageTiming: data.pageTiming || null,
+        requests: data.requests.slice(-MAX_REQUESTS)
+      };
+    }
+    await chrome.storage.session.set({ requestMonitorData: serializable });
+  }, 100);
+}
+
+async function restoreData() {
+  const saved = await chrome.storage.session.get("requestMonitorData");
+  for (const [tabId, data] of Object.entries(saved.requestMonitorData || {})) {
+    tabData.set(Number(tabId), {
+      pageUrl: data.pageUrl || "",
+      pageHost: data.pageHost || "",
+      listening: data.listening !== false,
+      clearStart: data.clearStart || Date.now(),
+      pageTiming: data.pageTiming || null,
+      requests: Array.from(data.requests || [])
+    });
+  }
+}
+
+restoreData();
 
 function getData(tabId) {
   if (!tabData.has(tabId)) {
@@ -31,13 +66,27 @@ function resetData(tabId, tabUrl) {
 }
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === "loading") resetData(tabId, tab.url || tab.pendingUrl);
+  if (changeInfo.status === "loading") {
+    const data = getData(tabId);
+    const nextUrl = tab.url || tab.pendingUrl || "";
+    let nextHost = "";
+    try {
+      nextHost = new URL(nextUrl).hostname;
+    } catch (_) {}
+
+    if (!data.pageHost || !nextHost || data.pageHost !== nextHost) {
+      resetData(tabId, nextUrl);
+    } else {
+      data.pageUrl = nextUrl;
+    }
+  }
   if (changeInfo.status === "complete") {
     const data = getData(tabId);
     data.pageUrl = tab.url || data.pageUrl;
     try {
       data.pageHost = new URL(data.pageUrl).hostname;
     } catch (_) {}
+    persistData();
   }
 });
 
