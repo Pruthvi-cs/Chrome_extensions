@@ -1,0 +1,23 @@
+{
+  "manifest_version": 3,
+  "name": "Live CSS Inspector",
+  "version": "1.0.0",
+  "description": "Hover over page elements, inspect CSS properties, and apply live CSS edits.",
+  "permissions": ["storage"],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Live CSS Inspector"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "exclude_matches": [
+        "*://chrome.google.com/*"
+      ],
+      "js": ["content.js"],
+      "css": [],
+      "run_at": "document_idle"
+    }
+  ]
+}

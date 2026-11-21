@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Live CSS Inspector</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <h1>Live CSS Inspector</h1>
+    <p>Inspect and edit elements without opening DevTools.</p>
+    <button id="toggle" type="button">
+      <span id="toggle-dot"></span>
+      <span id="toggle-label">Start Inspector</span>
+    </button>
+    <div class="help">
+      <span><kbd>Click</kbd> Select</span>
+      <span><kbd>Esc</kbd> Stop</span>
+    </div>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>
