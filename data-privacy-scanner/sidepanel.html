@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Website Data Privacy Scanner</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">PRIVACY SCAN</p>
+        <h1 id="domain">Loading...</h1>
+      </div>
+      <button id="refreshButton" type="button" title="Refresh scan">Refresh</button>
+    </header>
+
+    <section class="risk-card">
+      <div>
+        <span class="label">Risk level</span>
+        <strong id="risk">—</strong>
+      </div>
+      <div class="metrics">
+        <span><strong id="third-party-count">0</strong> third parties</span>
+        <span><strong id="tracker-count">0</strong> trackers</span>
+        <span><strong id="cookie-count">0</strong> cookies</span>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <h2>Collected or usable data</h2>
+        <span id="signal-count" class="count">0</span>
+      </div>
+      <div id="signals" class="list"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <h2>Third-party domains</h2>
+        <span id="third-party-badge" class="count">0</span>
+      </div>
+      <div id="third-parties" class="list"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <h2>Known trackers</h2>
+        <span id="tracker-badge" class="count">0</span>
+      </div>
+      <div id="trackers" class="list"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-heading">
+        <h2>Cookies</h2>
+        <span id="cookie-badge" class="count">0</span>
+      </div>
+      <div id="cookies" class="list"></div>
+    </section>
+
+    <p class="note">
+      Reports visible browser activity. It cannot prove every server-side use of personal data or read form/request contents.
+    </p>
+  </main>
+  <script src="sidepanel.js"></script>
+</body>
+</html>
