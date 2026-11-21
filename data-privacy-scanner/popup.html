@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Website Data Privacy Scanner</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main>
+    <header>
+      <div>
+        <h1>Privacy Scanner</h1>
+        <p id="site">Checking current page…</p>
+      </div>
+      <button id="refresh" type="button" title="Refresh scan">↻</button>
+    </header>
+
+    <section class="summary">
+      <div><strong id="risk">—</strong><span>risk level</span></div>
+      <div><strong id="third-party-count">0</strong><span>third parties</span></div>
+      <div><strong id="tracker-count">0</strong><span>trackers</span></div>
+    </section>
+
+    <section>
+      <h2>Collected or usable data signals</h2>
+      <div id="signals" class="list"></div>
+    </section>
+
+    <section>
+      <h2>Third-party domains</h2>
+      <div id="third-parties" class="list"></div>
+    </section>
+
+    <section>
+      <h2>Cookies</h2>
+      <div id="cookies" class="list"></div>
+    </section>
+
+    <p class="note">This scan reports signals and network activity. It cannot prove every type of server-side data use or read request bodies.</p>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>
