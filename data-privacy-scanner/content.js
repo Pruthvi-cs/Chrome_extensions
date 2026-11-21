@@ -30,14 +30,14 @@
     signals.push("IndexedDB storage is available");
   }
 
-  const addPermissionSignal = (name, property) => {
-    if (!(property in navigator)) return;
+  const addPermissionSignal = (name, property, target = navigator) => {
+    if (!(property in target)) return;
     signals.push(`${name} API is available`);
   };
 
   addPermissionSignal("Geolocation", "geolocation");
   addPermissionSignal("Clipboard", "clipboard");
-  addPermissionSignal("Notifications", "Notification");
+  addPermissionSignal("Notifications", "Notification", window);
 
   if (navigator.mediaDevices) {
     if (typeof navigator.mediaDevices.getUserMedia === "function") {
