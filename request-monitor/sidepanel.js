@@ -1,6 +1,7 @@
 let activeTabId = null;
 let report = null;
 let listening = true;
+let selectedRequest = null;
 
 const domainEl = document.getElementById("domain");
 const listenButton = document.getElementById("listenButton");
@@ -47,6 +48,7 @@ function getReceivedSize(request) {
 }
 
 function renderDetails(request) {
+  selectedRequest = request;
   const received = getReceivedSize(request);
   const headersToText = (headers) => Array.isArray(headers)
     ? headers.map((header) => `${header.name}: ${header.value}`).join("\n")
@@ -208,7 +210,15 @@ clearButton.addEventListener("click", () => {
 });
 
 document.getElementById("closeDetail").addEventListener("click", () => {
+  selectedRequest = null;
   detailPanel.hidden = true;
+});
+
+document.getElementById("copyDetail").addEventListener("click", async () => {
+  if (!selectedRequest) return;
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(selectedRequest, null, 2));
+  } catch (_) {}
 });
 
 searchInput.addEventListener("input", render);

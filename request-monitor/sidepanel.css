@@ -220,6 +220,18 @@ button.primary {
   text-transform: uppercase;
 }
 
+.detail-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.detail-actions button {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .detail-heading button {
   border: 0;
   background: transparent;
