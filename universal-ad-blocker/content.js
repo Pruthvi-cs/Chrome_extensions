@@ -44,6 +44,7 @@ function reportBlocked(count = 1) {
 
 function removePageAds() {
   if (!blockingEnabled) return;
+  if (location.hostname === "youtube.com" || location.hostname.endsWith(".youtube.com")) return;
 
   for (const element of document.querySelectorAll(AD_SELECTORS.join(","))) {
     if (removedElements.has(element)) continue;
@@ -63,8 +64,6 @@ function removePageAds() {
     element.remove();
     reportBlocked();
   }
-
-  skipYouTubeAd();
   hideSpotifyAd();
 }
 
