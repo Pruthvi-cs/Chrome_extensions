@@ -14,6 +14,7 @@
   "action": {
     "default_title": "Open Live Request Monitor"
   },
+  "devtools_page": "devtools.html",
   "side_panel": {
     "default_path": "sidepanel.html"
   },
