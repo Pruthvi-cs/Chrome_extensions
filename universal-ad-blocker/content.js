@@ -94,6 +94,13 @@ function skipYouTubeAd() {
   if (skipButton) {
     youtubeAdHandledAt = now;
     skipButton.click();
+  } else if (Number.isFinite(video.duration) && video.duration > 0) {
+    youtubeAdHandledAt = now;
+    try {
+      video.currentTime = video.duration;
+    } catch (_) {
+      // Some embedded YouTube players prevent direct seeking.
+    }
   }
 
   if (lastYouTubeAdVideo !== video) {
