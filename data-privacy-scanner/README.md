@@ -18,6 +18,10 @@ It reports:
 3. Choose **Load unpacked**.
 4. Select this folder.
 
+## Side panel
+
+Click the extension toolbar button to open the privacy report in Chrome's right side panel. Use **Refresh** to update the report for the active tab.
+
 ## Limitations
 
 This scanner observes visible browser activity. It does not read form values or request bodies, cannot prove server-side use of personal data, and may miss data sent through mechanisms not visible to Chrome APIs.
