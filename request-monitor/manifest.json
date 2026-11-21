@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "Live Request Monitor",
+  "version": "1.0.0",
+  "description": "Monitor requests sent and data received by the active webpage.",
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage",
+    "webRequest",
+    "sidePanel"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_title": "Open Live Request Monitor"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ]
+}

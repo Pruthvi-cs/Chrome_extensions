@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Live Request Monitor</title>
+  <link rel="stylesheet" href="sidepanel.css">
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">NETWORK</p>
+        <h1 id="domain">Loading...</h1>
+      </div>
+      <div class="header-actions">
+        <button id="listenButton" class="primary" type="button">Pause</button>
+        <button id="clearButton" type="button">Clear</button>
+      </div>
+    </header>
+
+    <section class="metrics">
+      <div><strong id="request-count">0</strong><span>requests</span></div>
+      <div><strong id="sent-size">0 KB</strong><span>sent</span></div>
+      <div><strong id="received-size">0 KB</strong><span>received</span></div>
+      <div><strong id="error-count">0</strong><span>errors</span></div>
+    </section>
+
+    <section class="filters">
+      <input id="search" type="search" placeholder="Filter URL or domain" autocomplete="off">
+      <select id="typeFilter" aria-label="Request type">
+        <option value="">All types</option>
+        <option value="main_frame">Document</option>
+        <option value="sub_frame">Frame</option>
+        <option value="script">Script</option>
+        <option value="stylesheet">Stylesheet</option>
+        <option value="image">Image</option>
+        <option value="media">Media</option>
+        <option value="xmlhttprequest">Fetch/XHR</option>
+        <option value="ping">Ping</option>
+        <option value="other">Other</option>
+      </select>
+    </section>
+
+    <section class="table">
+      <div class="table-head">
+        <span>Method</span>
+        <span>Status</span>
+        <span>Host / Path</span>
+        <span>Type</span>
+        <span>Time</span>
+        <span>Sent</span>
+        <span>Received</span>
+      </div>
+      <div id="request-list" class="request-list"></div>
+    </section>
+
+    <section id="detail-panel" class="detail-panel" hidden>
+      <div class="detail-heading">
+        <h2>Request details</h2>
+        <button id="closeDetail" type="button">×</button>
+      </div>
+      <dl id="detail-list"></dl>
+    </section>
+  </main>
+  <script src="sidepanel.js"></script>
+</body>
+</html>
