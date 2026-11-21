@@ -159,6 +159,8 @@ function addRequest(details, update) {
   if (details.requestBody) {
     request.requestBodyBytes = estimateRequestBody(details.requestBody);
   }
+
+  persistData();
 }
 
 function estimateRequestBody(requestBody) {
@@ -227,6 +229,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type === "rm:pageTiming" && sender.tab?.id) {
     const data = getData(sender.tab.id);
     data.pageTiming = message.timing;
+    persistData();
   }
 
   if (message?.type === "rm:getReport") {
@@ -245,6 +248,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type === "rm:setListening") {
     const data = getData(message.tabId);
     data.listening = Boolean(message.enabled);
+    persistData();
     sendResponse({ ok: true });
     return true;
   }
@@ -253,6 +257,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const data = getData(message.tabId);
     data.requests = [];
     data.clearStart = Date.now();
+    persistData();
     sendResponse({ ok: true });
     return true;
   }
