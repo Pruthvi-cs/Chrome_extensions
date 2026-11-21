@@ -40,7 +40,10 @@ function statusClass(status) {
 
 function getReceivedSize(request) {
   const timing = (report?.pageTiming || []).find((entry) => entry.name === request.url);
-  return timing?.encodedSize ?? timing?.transferredSize ?? null;
+  return timing?.encodedSize
+    ?? timing?.transferredSize
+    ?? request.responseBodyBytes
+    ?? null;
 }
 
 function renderDetails(request) {
