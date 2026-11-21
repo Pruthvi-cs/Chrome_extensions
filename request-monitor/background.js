@@ -63,6 +63,7 @@ function resetData(tabId, tabUrl) {
     clearStart: Date.now(),
     listening: true
   });
+  persistData();
 }
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
