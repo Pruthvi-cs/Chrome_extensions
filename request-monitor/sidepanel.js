@@ -6,6 +6,7 @@ const domainEl = document.getElementById("domain");
 const listenButton = document.getElementById("listenButton");
 const clearButton = document.getElementById("clearButton");
 const searchInput = document.getElementById("search");
+const protocolFilter = document.getElementById("protocolFilter");
 const typeFilter = document.getElementById("typeFilter");
 const requestList = document.getElementById("request-list");
 const detailPanel = document.getElementById("detail-panel");
@@ -74,9 +75,11 @@ function renderDetails(request) {
 function render() {
   if (!report) return;
   const query = searchInput.value.trim().toLower();
+  const protocol = protocolFilter.value;
   const type = typeFilter.value;
 
   const requests = report.requests.filter((request) => {
+    if (protocol && request.protocol !== protocol) return false;
     if (type && request.type !== type) return false;
     if (!query) return true;
     return `${request.url} ${request.host} ${request.path}`.toLower().includes(query);
@@ -121,13 +124,8 @@ function render() {
 
     const url = document.createElement("span");
     url.className = "url";
-    const host = document.createElement("span");
-    host.className = "host";
-    host.textContent = request.host || "unknown";
-    const path = document.createElement("span");
-    path.className = "path";
-    path.textContent = request.path || "/";
-    url.append(host, document.createTextNode(request.path || "/"));
+    url.textContent = request.url || `${request.host}${request.path || "/"}`;
+    url.title = request.url || "";
 
     const type = document.createElement("span");
     type.textContent = request.type;
@@ -189,6 +187,7 @@ document.getElementById("closeDetail").addEventListener("click", () => {
 });
 
 searchInput.addEventListener("input", render);
+protocolFilter.addEventListener("change", render);
 typeFilter.addEventListener("change", render);
 chrome.tabs.onActivated.addListener(refresh);
 chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
