@@ -1,5 +1,31 @@
 [
   {
+    "id": 100,
+    "priority": 100,
+    "action": { "type": "allow" },
+    "condition": {
+      "initiatorDomains": [
+        "youtube.com",
+        "www.youtube.com",
+        "m.youtube.com",
+        "music.youtube.com",
+        "studio.youtube.com",
+        "youtu.be"
+      ],
+      "resourceTypes": [
+        "main_frame",
+        "sub_frame",
+        "script",
+        "xmlhttprequest",
+        "image",
+        "media",
+        "font",
+        "ping",
+        "other"
+      ]
+    }
+  },
+  {
     "id": 1,
     "priority": 1,
     "action": { "type": "block" },
