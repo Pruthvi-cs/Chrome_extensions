@@ -254,6 +254,49 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     persistData();
   }
 
+  if (message?.type === "rm:resourceRequests" && sender.tab?.id) {
+    const data = getData(sender.tab.id);
+    for (const resource of message.resources || []) {
+      let url;
+      let host = "";
+      try {
+        url = new URL(resource.name);
+        host = url.hostname;
+      } catch (_) {
+        continue;
+      }
+
+      const requestId = `resource:${resource.name}`;
+      let request = data.requests.find((item) => item.requestId === requestId);
+      if (!request) {
+        request = {
+          requestId,
+          method: "GET",
+          url: resource.name,
+          host,
+          path: url.pathname,
+          protocol: url.protocol,
+          type: resource.initiatorType || "other",
+          initiator: sender.tab.url || "",
+          status: "200",
+          fromCache: resource.transferredSize === 0,
+          ip: "",
+          requestBodyBytes: 0,
+          responseBodyBytes: resource.encodedSize || resource.decodedSize || null,
+          startTime: Date.now() - resource.duration - resource.startTime,
+          endTime: Date.now(),
+          duration: resource.duration,
+          transferredBytes: resource.transferredSize || null,
+          redirectCount: 0,
+          error: ""
+        };
+        data.requests.push(request);
+        if (data.requests.length > MAX_REQUESTS) data.requests.shift();
+      }
+    }
+    persistData();
+  }
+
   if (message?.type === "rm:getReport") {
     const data = getData(message.tabId);
     sendResponse({

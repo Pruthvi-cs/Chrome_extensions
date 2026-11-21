@@ -1,14 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Live Request Monitor",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Monitor requests sent and data received by the active webpage.",
   "permissions": [
     "activeTab",
     "tabs",
     "storage",
     "webRequest",
-    "webRequestBlocking",
     "sidePanel"
   ],
   "host_permissions": ["<all_urls>"],

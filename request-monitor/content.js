@@ -1,6 +1,7 @@
 (() => {
   function sendTiming() {
-    const timing = performance.getEntriesByType("resource").map((entry) => ({
+    const entries = performance.getEntriesByType("resource");
+    const timing = entries.map((entry) => ({
       name: entry.name,
       initiatorType: entry.initiatorType,
       startTime: Math.round(entry.startTime),
@@ -13,6 +14,11 @@
     chrome.runtime.sendMessage({
       type: "rm:pageTiming",
       timing
+    });
+
+    chrome.runtime.sendMessage({
+      type: "rm:resourceRequests",
+      resources: timing
     });
   }
 
